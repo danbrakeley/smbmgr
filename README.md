@@ -113,19 +113,12 @@ Additionally, you'll need **Docker** with Compose v2 to run all the tests.
 
 ## Tests
 
-The `tst_*` suites are excluded from the default `ALL` target (so an everyday `cmake --build` only builds the app), so build them explicitly before running `ctest`. Two build targets: `hlm_tests_unit` (just the serverless "unit"-labeled suites, matching `ctest ... -unit`) and `hlm_tests` (everything, matching `ctest ... -all`) — build the smaller one if that's all you're about to run, it skips compiling the docker-fixture suites:
+| command          | notes                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `make test-unit` | Builds and runs the unit tests. These don't need a server.                                              |
+| `make test-all`  | Builds and runs every test, including the integration and widget tests that need a Samba test server. |
 
-```powershell
-cmake --build --preset windows-debug --target tests/hlm_tests_unit --parallel
-ctest --preset windows-unit    # serverless unit tests (< 1 s)
-
-cmake --build --preset windows-debug --target tests/hlm_tests --parallel
-ctest --preset windows-all     # everything, incl. integration/widget suites
-```
-
-(On Linux, drop the `tests/` prefix — e.g. `cmake --build --preset linux-debug --target hlm_tests --parallel`, then `linux-unit` / `linux-all`. Windows needs that prefix because CMake's Visual Studio generator can't resolve a bare target name for a target defined in a subdirectory; Linux's Ninja generator doesn't need it.)
-
-The full run needs **Docker** with Compose v2: ctest builds and starts a Samba container (port 10445, share on a named volume), runs the SMB-backed suites against it, and tears it down. Without Docker on PATH those suites aren't registered and the unit tier still runs. See [`docs/testing.md`](./docs/testing.md) and [ADR 4](./docs/decisions/0004-automated-test-architecture.md).
+Running anything beyond the unit tests requires **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
 
 ## Releasing
 

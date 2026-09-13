@@ -488,9 +488,6 @@ quint64 SmbSession::createHardLink(const QString &existingPath, const QString &n
     OpRequest *request =
         newOpRequest(QStringLiteral("hard link created"), failMsg, fields);
     const quint64 id = request->id;
-    // smb2_link is our fork's patch (see ADR 0001 / spikes/01_libsmb2); it
-    // fails if newLinkPath already exists, which the dialog's rename-aside
-    // sequence guarantees it doesn't.
     if (smb2_link_async(m_ctx, toSmbPath(existingPath).constData(),
                         toSmbPath(newLinkPath).constData(),
                         &SmbSession::onOpDone, request) != 0) {

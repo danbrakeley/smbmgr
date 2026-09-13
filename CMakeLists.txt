@@ -22,9 +22,7 @@ if(MSVC)
 endif()
 
 # ---------------------------------------------------------------------------
-# libsmb2 — patched fork carrying the smb2_link hard-link patch (see ADR 0001
-# and spikes/01_libsmb2). Pinned to an exact commit: bump this deliberately and
-# re-verify the patch whenever libsmb2 is updated.
+# libsmb2 — pinned to an exact commit.
 # ---------------------------------------------------------------------------
 include(FetchContent)
 
