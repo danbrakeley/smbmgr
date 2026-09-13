@@ -1,0 +1,52 @@
+{
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
+  },
+  "effortLevel": "high",
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Staring at the wall",
+      "Staring off into space",
+      "Thinking about how fragile the human body is",
+      "Reassessing your value",
+      "Refilling the em dash hopper"
+    ]
+  }
+}

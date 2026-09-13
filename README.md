@@ -12,30 +12,45 @@
 
 ## Overview
 
-Hard Link Manager allows you to connect to a remote SMB server, view files/folders details including inode numbers and hard link counts, and then find possible duplicate files and replace one with a link to the other.
+Hard Link Manager allows you to connect to a remote SMB server, view
+files/folders details including inode numbers and hard link counts, and then
+find possible duplicate files and replace one with a link to the other.
 
-It does this as QUICKLY as possible, and as such it shows potential matches WITHOUT doing a comparison of the file contents. It relies on the human operator to know what is actually a match. AS SUCH THIS APP IS VERY DANGEROUS.
+It does this as QUICKLY as possible, and as such it shows potential matches
+WITHOUT doing a comparison of the file contents. It relies on the human
+operator to know what is actually a match. AS SUCH THIS APP IS VERY DANGEROUS.
 
-I do want to add byte-by-byte comparisons at some point, but for my initial use case, I didn't need it.
+I do want to add byte-by-byte comparisons at some point, but for my initial
+use case, I didn't need it.
 
-Here's what v0.3.1 looks like in action, with the interface for searching and viewing results on the left, and detailed directory listings on the right:
+Here's what v0.3.1 looks like in action, with the interface for searching and
+viewing results on the left, and detailed directory listings on the right:
 
 ![a screenshot of the app running on Windows](./docs/screenshot-v0.3.1.png)
 
 ## Original Problem
 
-I've got an SMB share with large files that never change, but there are some copies of the same file in different folders with different names, and because the files are large, this wastes a lot of disk space. So I wanted to find these duplicate files, and use [hard links](https://en.wikipedia.org/wiki/Hard_link) to force them both to share the same bytes on disk.
+I've got an SMB share with large files that never change, but there are some
+copies of the same file in different folders with different names, and because
+the files are large, this wastes a lot of disk space. So I wanted to find these
+duplicate files, and use [hard links](https://en.wikipedia.org/wiki/Hard_link)
+to force them both to share the same bytes on disk.
 
-There are command line solutions that will do this (e.g. [jdupes](https://codeberg.org/jbruchon/jdupes)), but I wanted a different experience, including:
+There are command line solutions that will do this (e.g.
+[jdupes](https://codeberg.org/jbruchon/jdupes)), but I wanted a different
+experience, including:
 
-1. do all work remotely via an existing SMB user, with that user's credentials and permissions.
-2. avoid reading every byte of every file I wanted to compare, and instead quickly locate potential matches, then choose the actual matches by hand.
+1. do all work remotely via an existing SMB user, with that user's credentials
+   and permissions.
+2. avoid reading every byte of every file I wanted to compare, and instead
+   quickly locate potential matches, then choose the actual matches by hand.
 3. browse files/folders in a GUI, seeing inode and hard link info.
 
 ## Constraints
 
 - GUI application
-- App starts quickly, stays responsive during work (lightweight, batches slow work in threads)
+- App starts quickly, stays responsive during work (lightweight, batches slow
+  work in threads)
 - Low resource usage
 - Cross platform (Windows & Linux required; macOS is nice-to-have)
 - Looks and feels like a native app on each platform.
@@ -47,7 +62,8 @@ There are command line solutions that will do this (e.g. [jdupes](https://codebe
 
 ## Build
 
-The included [`Makefile`](./Makefile) handles most common operations in a cross-platform way.
+The included [`Makefile`](./Makefile) handles most common operations in a
+cross-platform way.
 
 ```text
 $ make help
