@@ -12,10 +12,8 @@
 #include "common/TestMain.h"
 
 // The rename → link → unlink engine, against the Samba fixture, with every
-// outcome verified out-of-band in the container. Covers testing.md milestone 4
-// ("Happy path", "Three files", "No leftover tmp", "Link failure restores",
-// "Already-linked pair", "Disconnect mid-run") at the engine level; the Hard
-// Link dialog and Match Finder UI on top are covered by the widget suites.
+// outcome verified out-of-band in the container. The Match Finder UI on top is
+// covered by tst_matchfinderpanel.
 class TestLinkRunner : public QObject
 {
     Q_OBJECT
@@ -68,7 +66,8 @@ TestLinkRunner::RunResult TestLinkRunner::run(SmbSession &session,
             });
 
     runner.start(jobs);
-    // allFinished clears the job list last, so poll the captured counts.
+    // allFinished sets the counts, so they mark completion. (QTRY_* returns on
+    // failure, hence the void lambda inside this value-returning function.)
     [&] { QTRY_VERIFY_WITH_TIMEOUT(result.succeeded >= 0, 30000); }();
     return result;
 }
@@ -79,8 +78,8 @@ void TestLinkRunner::happyPathSingleVictim()
     m_fx.seedFile(dir, "primary.bin", 100, 'p');
     m_fx.seedFile(dir, "victim.bin", 90, 'v');
 
-    // A successful run must leave a complete audit trail (docs/roadmap.md):
-    // capture this test's log lines in a file of their own.
+    // A successful run must leave a complete audit trail: capture this test's
+    // log lines in a file of their own.
     const QString logPath = m_logDir.filePath("happy.jsonl");
     Logger::instance().setFilePath(logPath);
 
@@ -154,8 +153,8 @@ void TestLinkRunner::multipleVictimsSequential()
     QCOMPARE(m_fx.ls(dir).filter("hlmgr-tmp").size(), 0);
 }
 
-// Running the dialog on two names that are already hard links of each other
-// must lose no data.
+// Linking two names that are already hard links of each other must lose no
+// data.
 void TestLinkRunner::alreadyLinkedPair()
 {
     const QString dir = m_fx.makeCaseDir("alreadylinked");
@@ -173,10 +172,8 @@ void TestLinkRunner::alreadyLinkedPair()
     QCOMPARE(m_fx.ls(dir).filter("hlmgr-tmp").size(), 0);
 }
 
-// testing.md M4 "Link failure restores" — never verified manually (needed a
-// server-side failure injection). A nonexistent primary lets the rename
-// succeed and the link step fail: the victim must come back under its
-// original name with its original content.
+// A nonexistent primary lets the rename succeed and the link step fail: the
+// victim must come back under its original name with its original content.
 void TestLinkRunner::linkFailureRestoresOriginal()
 {
     const QString dir = m_fx.makeCaseDir("linkfail");
@@ -221,9 +218,9 @@ void TestLinkRunner::renameFailureLeavesVictimUntouched()
     QCOMPARE(m_fx.statPath(dir + "/victim.bin").nlink, 1);
 }
 
-// testing.md M4 "Disconnect mid-run": disconnect after the first job — the
-// remaining jobs fail cleanly, no crash. (SmbSession queues op completions,
-// so disconnecting from inside a jobFinished handler is the supported path.)
+// Disconnect after the first job: the remaining jobs fail cleanly, no crash.
+// (SmbSession queues op completions, so disconnecting from inside a
+// jobFinished handler is the supported path.)
 void TestLinkRunner::disconnectMidRun()
 {
     const QString dir = m_fx.makeCaseDir("middisconnect");

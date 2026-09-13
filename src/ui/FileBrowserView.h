@@ -47,9 +47,7 @@ signals:
     void errorOccurred(const QString &message); // surfaced in the main status bar
     void selectionChanged(); // fires on user selection and on listing changes
 
-    // The user picked a View menu option. This view does NOT apply the mode
-    // to itself on this signal - MainWindow re-broadcasts to every view via
-    // setIconMode() so both panes stay in sync.
+    // The user picked a View menu option; not applied locally (see setIconMode).
     void iconModeChangeRequested(FileListModel::IconMode mode);
 
 private:
@@ -87,7 +85,7 @@ private:
     QString m_pendingPath;   // path of the in-flight listing, empty if none
     QString m_pendingReveal; // file to select once the pending listing lands
 
-    // Lazy link-count fill-in (milestone 3): a bounded number of stats is in
+    // Lazy link-count fill-in: a bounded number of stats is in
     // flight, visible rows are served first, and navigation resets everything
     // (replies for the old directory miss m_statInFlight and are dropped).
     QList<int> m_statOrder;          // source rows of all files, listing order

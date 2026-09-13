@@ -18,10 +18,8 @@
 #include "common/TestMain.h"
 #include "common/TestSupport.h"
 
-// The Match Finder panel driven through its widgets. Covers testing.md M7
-// "Options persist", "Saved-path validation", "Basic search" (UI wiring),
-// "Cancel mid-search" (UI), and "Check-all + link run" including the conflict
-// warning. The search/pairing engine has its own suites.
+// The Match Finder panel driven through its widgets. The search/pairing engine
+// has its own suites.
 class TestMatchFinderPanel : public QObject
 {
     Q_OBJECT

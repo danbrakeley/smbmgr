@@ -111,7 +111,7 @@ void TestFileFilterProxyModel::caseSensitiveSort()
     FileFilterProxyModel proxy;
     proxy.setSourceModel(&source);
 
-    // Uppercase sorts before lowercase once the "Aa" toggle flips this on.
+    // Uppercase sorts before lowercase under the Case-Sensitive sort option.
     proxy.setSortCaseSensitivity(Qt::CaseSensitive);
     proxy.sort(FileListModel::NameColumn, Qt::AscendingOrder);
     QCOMPARE(namesInOrder(proxy),
@@ -141,7 +141,7 @@ void TestFileFilterProxyModel::filterIsCaseInsensitiveContains()
     proxy.setFilterFixedString("bb");
     QCOMPARE(proxy.rowCount(), 1);
     QCOMPARE(proxy.index(0, FileListModel::NameColumn).data().toString(), "Bbb.txt");
-    // The "matches / total" label reads these two counts.
+    // The status bar's Visible and Total labels read these two counts.
     QCOMPARE(source.rowCount(), 5);
 
     proxy.setFilterFixedString(QString());

@@ -148,7 +148,6 @@ void MatchSearcher::onDirectoryListFailed(const QString &path, const QString &me
     pumpListings();
 }
 
-// The pairing itself is pure and lives in core/MatchPairing.h.
 void MatchSearcher::computeMatches()
 {
     // Take everything the traversal gathered so the searcher is idle (and

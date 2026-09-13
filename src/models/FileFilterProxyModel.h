@@ -2,10 +2,11 @@
 
 #include <QSortFilterProxyModel>
 
-// Sort/filter layer over FileListModel: folders always group above files no
-// matter which column or direction is sorted; within each group the usual
-// column comparison applies (case-insensitive for names). Filtering is the
-// inherited fixed-string "contains" match, case-insensitive, on the name.
+// Sort/filter layer over FileListModel: by default folders group above files
+// no matter which column or direction is sorted (see setFoldersFirst); within
+// each group the usual column comparison applies (case-insensitive for names
+// unless setSortCaseSensitivity changes it). Filtering is the inherited
+// fixed-string "contains" match, case-insensitive, on the name.
 class FileFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT

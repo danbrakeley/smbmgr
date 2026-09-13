@@ -14,11 +14,9 @@
 #include "common/SmbFixture.h"
 #include "common/TestMain.h"
 
-// One file-browser view against the Samba fixture: navigation, filter, count
-// label, and the lazy link-count fill-in (throttled via HLM_STAT_DELAY_MS to
-// make it observable). Covers testing.md M2 "Root listing" / "Navigation" /
-// "Bad path" / "Filter" / "Parent button" and M3 "Counts populate" / "Large
-// directory drains" / "Navigation cancels" / "Disconnect mid-fill".
+// One file-browser view against the Samba fixture: navigation, filter, status
+// bar, and the lazy link-count fill-in (throttled via HLM_STAT_DELAY_MS to
+// make it observable).
 class TestFileBrowserView : public QObject
 {
     Q_OBJECT
@@ -93,7 +91,7 @@ void TestFileBrowserView::navigationByActivationAndPathBox()
     view.navigateTo(dir);
     QTRY_COMPARE(view.currentPath(), dir);
 
-    // Select the folder row and press Enter (testing.md M2 "Navigation down").
+    // Select the folder row and press Enter to navigate into it.
     auto *tree = view.findChild<QTreeView *>("fbv.tree");
     tree->setCurrentIndex(tree->model()->index(0, 0)); // "sub", folders on top
     QTest::keyClick(tree, Qt::Key_Return);

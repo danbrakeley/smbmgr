@@ -126,8 +126,7 @@ SmbSession::SmbSession(QObject *parent)
     connect(m_tickTimer, &QTimer::timeout, this, [this] { service(0); });
 
     // Audit-log every error signal here, in one place per signal, instead of
-    // at each emit site (docs/roadmap.md: log errors during connection or
-    // communication with a server).
+    // at each emit site.
     connect(this, &SmbSession::errorOccurred, this, [this](const QString &message) {
         Logger::instance().error(QStringLiteral("connection error"),
                                  {{QStringLiteral("url"), m_spec.url()},
@@ -148,7 +147,7 @@ SmbSession::SmbSession(QObject *parent)
                                   {QStringLiteral("error"), message}});
     });
 
-    // Debug throttle for manual testing (docs/testing.md): a fast LAN server
+    // Debug throttle for manual and automated testing: a fast LAN server
     // answers stats too quickly to observe the lazy fill-in, so this delays
     // each stat by N ms before it is sent, simulating a slow server. Each
     // delayed stat keeps holding its slot in the view's in-flight window, so
@@ -359,7 +358,7 @@ void SmbSession::onOpendirDone(struct smb2_context *ctx, int status,
         entry.size = ent->st.smb2_size;
         entry.modified = QDateTime::fromSecsSinceEpoch(qint64(ent->st.smb2_mtime));
         entry.inode = ent->st.smb2_ino;
-        // entry.nlink stays unknown: enumeration never reports it (see CLAUDE.md).
+        // entry.nlink stays unknown: enumeration never reports it (see FileEntry).
         entries.append(entry);
     }
     smb2_closedir(ctx, dir);
@@ -426,10 +425,6 @@ void SmbSession::onStatDone(struct smb2_context *ctx, int status,
 
     emit self->fileStatted(path, int(st.smb2_nlink), st.smb2_ino);
 }
-
-// The mutating operations always report completion asynchronously — even
-// immediate failures — so callers can store the returned id before any
-// operationSucceeded/operationFailed for it can arrive.
 
 quint64 SmbSession::failOpLater(const QString &failMsg, const QJsonObject &fields,
                                 const QString &message)

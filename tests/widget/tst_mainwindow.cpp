@@ -14,9 +14,7 @@
 
 // The main-window connect flow and toolbar logic, driven through the real
 // widgets with a stubbed password prompt (the modal QInputDialog never runs
-// under test). Covers testing.md M1 "Connect"/"Disconnect"/"Cancelled
-// password prompt"/"Bad URL", M5 "Cross-view selection"/"Remembered URL",
-// and the M7 panel layout.
+// under test).
 class TestMainWindow : public QObject
 {
     Q_OBJECT
@@ -28,6 +26,7 @@ private slots:
     void emptyUrlAsksForOne();
     void cancelledPromptStaysDisconnected();
     void connectFlowBuildsTwoViewsAndPanel();
+    void defaultSplitIsEven();
     void disconnectRestoresPlaceholder();
     void rememberedUrl();
 
@@ -114,7 +113,7 @@ void TestMainWindow::connectFlowBuildsTwoViewsAndPanel()
     MainWindow window;
     connectWindow(window);
 
-    // Exactly two views (ADR 0003) left of the Match Finder panel.
+    // Exactly two views (ADR 0003) right of the Match Finder panel.
     QCOMPARE(window.findChildren<FileBrowserView *>().size(), 2);
     QCOMPARE(window.findChildren<MatchFinderPanel *>().size(), 1);
     QVERIFY(qobject_cast<QSplitter *>(window.centralWidget()));
@@ -125,6 +124,26 @@ void TestMainWindow::connectFlowBuildsTwoViewsAndPanel()
     for (FileBrowserView *view : window.findChildren<FileBrowserView *>()) {
         QTRY_COMPARE(view->currentPath(), "/");
     }
+}
+
+// With no saved splitter state, the panel and the views get half the width
+// each.
+void TestMainWindow::defaultSplitIsEven()
+{
+    MainWindow window;
+    window.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    connectWindow(window);
+
+    auto *splitter = qobject_cast<QSplitter *>(window.centralWidget());
+    QVERIFY(splitter);
+    QCOMPARE(splitter->count(), 2);
+    // Sizes settle once the new central widget is laid out.
+    QTRY_VERIFY2(qAbs(splitter->sizes().at(0) - splitter->sizes().at(1)) <= 1,
+                 qPrintable(QStringLiteral("%1 vs %2")
+                                .arg(splitter->sizes().at(0))
+                                .arg(splitter->sizes().at(1))));
+    QVERIFY(splitter->sizes().at(0) > window.width() / 4);
 }
 
 void TestMainWindow::disconnectRestoresPlaceholder()

@@ -60,8 +60,8 @@ struct SmbShareSpec
 // Runs entirely on the GUI thread: libsmb2's async API is driven by
 // QSocketNotifiers on the context's socket plus a coarse tick timer for its
 // timeout processing, so the rest of the app needs no locking or cross-thread
-// marshalling. This is also what makes the connect flow abortable and (from
-// milestone 3 on) lets many stat requests be in flight at once.
+// marshalling. This is also what makes the connect flow abortable and lets
+// many stat requests be in flight at once.
 class SmbSession : public QObject
 {
     Q_OBJECT
@@ -100,10 +100,11 @@ public:
     // statFailed(); many stats can be in flight at once (pipelined PDUs).
     void statFile(const QString &path);
 
-    // Mutating operations, used by the Hard Link dialog to chain its
-    // rename -> link -> unlink sequence. Each returns a request id; completion
-    // arrives as operationSucceeded(id) or operationFailed(id, message) —
-    // always asynchronously, even for immediate failures.
+    // Mutating operations, used by LinkRunner to chain its rename -> link ->
+    // unlink sequence. Each returns a request id; completion arrives as
+    // operationSucceeded(id) or operationFailed(id, message) — always
+    // asynchronously, even for immediate failures, so callers can store the
+    // id before its completion arrives.
     quint64 renameFile(const QString &fromPath, const QString &toPath);
     quint64 createHardLink(const QString &existingPath, const QString &newLinkPath);
     quint64 removeFile(const QString &path);

@@ -4,15 +4,14 @@
 #include <QJsonObject>
 #include <QObject>
 
-// App-wide audit log (docs/roadmap.md "Keep log/history of actions/errors"):
-// appends one compact JSON object per line to a .jsonl file. Every action
-// that changes files/folders on the server must be logged, plus connects,
-// disconnects, and network errors — all of which flow through SmbSession, so
-// that's where the log calls live.
+// App-wide audit log: appends one compact JSON object per line to a .jsonl
+// file. Every action that changes files/folders on the server must be logged,
+// plus connects, disconnects, and network errors — all of which flow through
+// SmbSession, so that's where the log calls live.
 //
 // File output is off until setFilePath() points somewhere (main() sets the
 // app-data location; tests use a temp dir or leave it off). entryLogged fires
-// either way — the hook for the planned in-app log viewer.
+// either way.
 class Logger : public QObject
 {
     Q_OBJECT

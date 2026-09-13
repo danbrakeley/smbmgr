@@ -59,8 +59,8 @@ private:
     QAction *m_aboutAction = nullptr;
     QLabel *m_centralLabel = nullptr;         // placeholder while not connected
     QSplitter *m_hSplitter = nullptr;         // central widget while connected
-    QSplitter *m_splitter = nullptr;          // left side: the stacked views
-    MatchFinderPanel *m_matchPanel = nullptr; // right side of m_hSplitter
+    QSplitter *m_splitter = nullptr;          // right side: the stacked views
+    MatchFinderPanel *m_matchPanel = nullptr; // left side of m_hSplitter
     QList<FileBrowserView *> m_views;         // children of m_splitter
     QTimer *m_spinnerTimer = nullptr;
     int m_spinnerAngle = 0;

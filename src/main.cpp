@@ -34,10 +34,9 @@ int main(int argc, char *argv[])
     // explicitly to match resources/linux/hardlinkmgr.desktop's install name.
     QGuiApplication::setDesktopFileName(QStringLiteral("hardlinkmgr"));
 
-    // Audit log (docs/roadmap.md "Keep log/history of actions/errors"). Lands
-    // in %LOCALAPPDATA%\brakeley\hardlinkmgr on Windows, ~/.local/share/...
-    // on Linux; must come after the setOrganizationName/setApplicationName
-    // calls above, which determine that location.
+    // Audit log. Lands in %LOCALAPPDATA%\brakeley\hardlinkmgr on Windows,
+    // ~/.local/share/... on Linux; must come after the setOrganizationName/
+    // setApplicationName calls above, which determine that location.
     Logger::instance().setFilePath(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)
         + QStringLiteral("/log.jsonl"));

@@ -6,11 +6,9 @@
 #include "common/SmbFixture.h"
 #include "common/TestMain.h"
 
-// The recursive enumeration + pairing pipeline against the Samba fixture.
-// Covers testing.md milestone 7 "Basic search", "Overlapping paths", "Include
-// Subfolders off", "Size options", "Cancel mid-search" and "Search errors" at
-// the engine level (the panel UI on top is covered by tst_matchfinderpanel).
-// The pure pairing math has its own serverless suite (tst_matchpairing).
+// The recursive enumeration + pairing pipeline against the Samba fixture (the
+// panel UI on top is covered by tst_matchfinderpanel). The pure pairing math
+// has its own serverless suite (tst_matchpairing).
 class TestMatchSearcher : public QObject
 {
     Q_OBJECT
@@ -120,7 +118,7 @@ void TestMatchSearcher::basicSearch()
                             dir + "/p/sub/b.bin|" + dir + "/s/x.bin"}));
 }
 
-// testing.md M7 "Overlapping paths", first half: Primary == Secondary.
+// Overlapping roots, first case: Primary == Secondary.
 void TestMatchSearcher::identicalRootsProduceNoSelfPairs()
 {
     const QString dir = m_fx.makeCaseDir("identicalroots");
@@ -142,8 +140,8 @@ void TestMatchSearcher::identicalRootsProduceNoSelfPairs()
     QCOMPARE(result.foldersListed, 1);
 }
 
-// testing.md M7 "Overlapping paths", second half: Secondary nested inside a
-// recursive Primary — the overlap is traversed once.
+// Overlapping roots, second case: Secondary nested inside a recursive Primary
+// — the overlap is traversed once.
 void TestMatchSearcher::nestedRootsListOverlapOnce()
 {
     const QString dir = m_fx.makeCaseDir("nestedroots");
@@ -188,9 +186,9 @@ void TestMatchSearcher::nonRecursiveSideStaysShallow()
              QSet<QString>({dir + "/p/top.bin|" + dir + "/s/x.bin"}));
 }
 
-// testing.md M7 "Size options": Size Min excludes small files; a nonzero Size
-// Difference admits near-size pairs that an exact search rejects. (The window
-// math itself is unit-tested in tst_matchpairing.)
+// Size Min excludes small files; a nonzero Size Difference admits near-size
+// pairs that an exact search rejects. (The window math itself is unit-tested
+// in tst_matchpairing.)
 void TestMatchSearcher::sizeOptions()
 {
     const QString dir = m_fx.makeCaseDir("sizeoptions");
@@ -208,10 +206,11 @@ void TestMatchSearcher::sizeOptions()
     options.primaryPath = dir + "/p";
     options.secondaryPath = dir + "/s";
 
-    // Exact sizes only: nothing pairs (100 vs 105; the tiny pair does match).
+    // Exact sizes with a 50-byte minimum: 100 vs 105 is too far apart, and the
+    // equal-size tiny pair falls below the minimum, so nothing pairs.
     options.sizeMinBytes = 50;
     options.sizeDiffBytes = 0;
-    QVERIFY(search(session, options).matches.isEmpty()); // tinies below sizeMin
+    QVERIFY(search(session, options).matches.isEmpty());
 
     // Admit the tiny pair by dropping the minimum.
     options.sizeMinBytes = 0;
@@ -225,8 +224,8 @@ void TestMatchSearcher::sizeOptions()
              QSet<QString>({dir + "/p/big.bin|" + dir + "/s/near.bin"}));
 }
 
-// testing.md M7 "Cancel mid-search": finished(cancelled=true) once, and late
-// listing replies are dropped silently.
+// Cancelling emits finished(cancelled=true) once, and late listing replies are
+// dropped silently.
 void TestMatchSearcher::cancelMidSearch()
 {
     const QString dir = m_fx.makeCaseDir("cancel");
@@ -260,8 +259,7 @@ void TestMatchSearcher::cancelMidSearch()
     QCOMPARE(progressSpy.count(), progressSoFar);
 }
 
-// testing.md M7 "Search errors", root half: an unlistable root fails the
-// whole search.
+// An unlistable root fails the whole search.
 void TestMatchSearcher::nonexistentRootFails()
 {
     const QString dir = m_fx.makeCaseDir("badroot");
@@ -278,8 +276,7 @@ void TestMatchSearcher::nonexistentRootFails()
     QVERIFY(result.failureMessage.contains(dir + "/missing"));
 }
 
-// testing.md M7 "Search errors", subfolder half: an unlistable subfolder is
-// counted but doesn't kill the search.
+// An unlistable subfolder is counted but doesn't kill the search.
 void TestMatchSearcher::unlistableSubfolderCountsAsError()
 {
     const QString dir = m_fx.makeCaseDir("badsub");

@@ -63,10 +63,9 @@ AboutDialog::AboutDialog(QWidget *parent)
 
         auto *manager = new QNetworkAccessManager(this);
 
-        // Not /releases/latest: that endpoint only considers releases not
-        // marked "pre-release", and 404s if every release is (as they
-        // currently all are here) — the plain list is sorted newest-first
-        // and includes them.
+        // Not /releases/latest: that endpoint skips releases marked
+        // "pre-release" (and 404s if every release is one). The plain list is
+        // sorted newest-first and includes them.
         QNetworkRequest request(
             QUrl(QStringLiteral("https://api.github.com/repos/danbrakeley/hardlinkmgr/releases")));
         // GitHub's API rejects requests with no User-Agent header (403).

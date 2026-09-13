@@ -3,7 +3,7 @@
 #
 # Built from a digest-pinned base for reproducibility. To bump: docker pull
 # debian:trixie-slim, copy the new digest here, rebuild, and re-run the full
-# `docker` label (the ADR notes this procedure).
+# `docker` label.
 FROM debian:trixie-slim@sha256:020c0d20b9880058cbe785a9db107156c3c75c2ac944a6aa7ab59f2add76a7bd
 
 # smbclient is only for the healthcheck (and ad-hoc debugging).

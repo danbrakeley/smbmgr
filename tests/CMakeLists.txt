@@ -38,20 +38,17 @@ function(hlm_add_test name)
   endif()
 endfunction()
 
-# --- Tier 1: pure unit tests, no server --------------------------------------
+# --- Unit tests: no server ---------------------------------------------------
 
 hlm_add_test(tst_pathutil             SOURCES unit/tst_pathutil.cpp             LABELS "unit")
 
 if(WIN32)
-  # Every suite links identical Qt modules (Core/Gui/Network/Svg/Test/Widgets,
-  # all via hardlinkmgr_core + Qt6::Test), and they all land in the same
-  # bin/<Config> directory — so one windeployqt run (scanning tst_pathutil,
-  # built just above) stages the runtime for all of them. Doing this per test
-  # exe was both slow (15 windeployqt invocations) and, under a parallel
-  # build, a race: concurrent copies into the same directory could collide.
-  # windeployqt only stages the qwindows platform plugin, but the suites run
-  # under QT_QPA_PLATFORM=offscreen (see common/TestMain.h) — copy that
-  # plugin in ourselves.
+  # Every suite links the same Qt modules and lands in the same bin/<Config>
+  # directory, so one windeployqt run (scanning tst_pathutil, built just
+  # above) stages the runtime for all of them; a run per suite would be slow
+  # and would race under a parallel build. windeployqt only stages the
+  # qwindows platform plugin, but the suites run under QT_QPA_PLATFORM=offscreen
+  # (see common/TestMain.h), so copy that plugin in too.
   add_custom_target(hlm_tests_deploy_qt
     COMMAND Qt6::windeployqt
             --no-translations
@@ -81,7 +78,7 @@ hlm_add_test(tst_smbsession_offline
   SOURCES integration/tst_smbsession_offline.cpp
   LABELS "unit")
 
-# --- Tier 2/3: suites that need the Samba fixture (label "docker") -----------
+# --- Suites that need the Samba fixture (label "docker") ---------------------
 #
 # ctest starts/stops the container itself via the FIXTURES_SETUP/_CLEANUP pair
 # below; `down -v` also wipes the share volume, so every ctest session starts
