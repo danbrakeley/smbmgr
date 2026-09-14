@@ -43,10 +43,30 @@
   "testPresets": [
     {
       "name": "windows-unit",
-      "displayName": "Windows: serverless unit tests",
+      "displayName": "Windows: unit tests",
       "configurePreset": "windows",
       "configuration": "Debug",
-      "filter": { "include": { "label": "unit" } },
+      "filter": { "include": { "label": "^unit$" } },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-integration",
+      "displayName": "Windows: unit + serverless integration tests (no Docker)",
+      "configurePreset": "windows",
+      "configuration": "Debug",
+      "filter": {
+        "include": { "label": "^(unit|integration)$" },
+        "exclude": { "label": "^docker$" }
+      },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "windows-docker",
+      "displayName": "Windows: Samba-backed tests (needs Docker)",
+      "configurePreset": "windows",
+      "configuration": "Debug",
+      "filter": { "include": { "label": "^docker$" } },
+      "execution": { "noTestsAction": "error" },
       "output": { "outputOnFailure": true }
     },
     {
@@ -58,9 +78,27 @@
     },
     {
       "name": "linux-unit",
-      "displayName": "Linux: serverless unit tests",
+      "displayName": "Linux: unit tests",
       "configurePreset": "linux-debug",
-      "filter": { "include": { "label": "unit" } },
+      "filter": { "include": { "label": "^unit$" } },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-integration",
+      "displayName": "Linux: unit + serverless integration tests (no Docker)",
+      "configurePreset": "linux-debug",
+      "filter": {
+        "include": { "label": "^(unit|integration)$" },
+        "exclude": { "label": "^docker$" }
+      },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "linux-docker",
+      "displayName": "Linux: Samba-backed tests (needs Docker)",
+      "configurePreset": "linux-debug",
+      "filter": { "include": { "label": "^docker$" } },
+      "execution": { "noTestsAction": "error" },
       "output": { "outputOnFailure": true }
     },
     {

@@ -169,8 +169,9 @@ if(WIN32)
 endif()
 
 # ---------------------------------------------------------------------------
-# Tests (ctest). BUILD_TESTING is ON by default via include(CTest); the suites
-# labeled "docker" additionally need the Samba fixture (see tests/docker/).
+# Tests (ctest). BUILD_TESTING is ON by default via include(CTest). Suites are
+# labeled by folder ("unit", "integration", "widget"), plus "docker" if they
+# need the Samba fixture (see tests/docker/).
 # EXCLUDE_FROM_ALL keeps the tst_* executables off the default ALL target, so
 # an ordinary `cmake --build` (app dev loop, release packaging) only builds
 # smbmgr — build the "smbmgr_tests" target first to run the suite.

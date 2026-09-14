@@ -73,22 +73,26 @@ cross-platform way.
 ```text
 $ make help
 Targets:
-  configure  - regenerate CMake's build files (run after editing CMakeLists.txt)
-  release    - build smbmgr (Release, app only)
-  debug      - build smbmgr (Debug, app only)
-  test-unit  - build + run the serverless unit suite
-  test-all   - build + run every suite (needs Docker)
-  clean      - remove the build/ directory
+  configure        - regenerate CMake's build files (run after editing CMakeLists.txt)
+  release          - build smbmgr (Release, app only)
+  debug            - build smbmgr (Debug, app only)
+  test-unit        - build + run the unit tests (pure logic, fast)
+  test-integration - build + run unit + serverless integration tests (no Docker)
+  test-docker      - build + run the Samba-backed suites (needs Docker)
+  test-all         - build + run every suite (needs Docker)
+  clean            - remove the build/ directory
 ```
 
-| command     | notes                                                                                  |
-| ----------- | -------------------------------------------------------------------------------------- |
-| `configure` | Run this on a fresh sync or after a `clean`, or whenever `CMakeLists.txt` has changed. |
-| `release`   | Generates a release executable. If it fails, try `configure release`.                  |
-| `debug`     | Generates a debug executable. If it fails, try `configure debug`.                      |
-| `test-unit` | Builds and runs unit tests. Does not require Docker.                                   |
-| `test-all`  | Builds and runs unit tests + integration tests. Requires Docker.                       |
-| `clean`     | `rm -rf build`. You'll need to re-run `configure` after.                               |
+| command            | notes                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| `configure`        | Run this on a fresh sync or after a `clean`, or whenever `CMakeLists.txt` has changed. |
+| `release`          | Generates a release executable. If it fails, try `configure release`.                  |
+| `debug`            | Generates a debug executable. If it fails, try `configure debug`.                      |
+| `test-unit`        | Builds and runs unit tests. Fast; does not require Docker.                             |
+| `test-integration` | Builds and runs unit tests + serverless integration tests. Does not require Docker.    |
+| `test-docker`      | Builds and runs the Samba-backed tests only. Requires Docker.                          |
+| `test-all`         | Builds and runs every test. Requires Docker.                                           |
+| `clean`            | `rm -rf build`. You'll need to re-run `configure` after.                               |
 
 ### Windows
 
@@ -118,12 +122,14 @@ Additionally, you'll need **Docker** with Compose v2 to run all the tests.
 
 ## Tests
 
-| command          | notes                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `make test-unit` | Builds and runs the unit tests. These don't need a server.                                              |
-| `make test-all`  | Builds and runs every test, including the integration and widget tests that need a Samba test server. |
+| command                 | notes                                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `make test-unit`        | Builds and runs the unit tests: pure logic, no server or network, fast.                                         |
+| `make test-integration` | Builds and runs the unit tests plus integration tests that need no server but touch the OS or network (slower). |
+| `make test-docker`      | Builds and runs only the integration and widget tests that need a Samba test server.                           |
+| `make test-all`         | Builds and runs every test.                                                                                     |
 
-Running anything beyond the unit tests requires **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
+`make test-docker` and `make test-all` require **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
 
 ## Releasing
 

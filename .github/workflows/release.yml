@@ -68,15 +68,16 @@ jobs:
 
       - name: Build tests
         # The Visual Studio generator needs the subdirectory-qualified target
-        # name. Unit suites only: this runner can't run the docker ones.
-        run: cmake --build --preset windows-debug --target tests/smbmgr_tests_unit --parallel
+        # name. Unit + integration suites only: this runner can't run the
+        # docker ones.
+        run: cmake --build --preset windows-debug --target tests/smbmgr_tests_integration --parallel
 
       - name: Run tests
         # windows-all needs Docker, and GitHub's windows runners can't run the
         # Linux containers the Samba fixture needs — docker-labeled suites run
-        # on the linux job instead. This still runs every Windows-buildable
-        # serverless suite.
-        run: ctest --preset windows-unit
+        # on the linux job instead. windows-integration still runs every
+        # serverless suite (unit + integration labels).
+        run: ctest --preset windows-integration
 
       - name: Build release
         # --target smbmgr: only the app is part of the shipped artifact;
