@@ -47,7 +47,7 @@ private:
 void TestMatchSearcher::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 TestMatchSearcher::SearchResult TestMatchSearcher::search(
@@ -303,6 +303,6 @@ void TestMatchSearcher::unlistableSubfolderCountsAsError()
              QSet<QString>({dir + "/p/a.bin|" + dir + "/s/b.bin"}));
 }
 
-HLM_TEST_MAIN(TestMatchSearcher)
+SMBMGR_TEST_MAIN(TestMatchSearcher)
 
 #include "tst_matchsearcher.moc"

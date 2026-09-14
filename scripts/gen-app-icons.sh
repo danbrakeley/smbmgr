@@ -24,7 +24,7 @@ hicolor_sizes=(16 32 48 64 128 256)
 for size in "${hicolor_sizes[@]}"; do
     out_dir="$app_dir/hicolor/${size}x${size}/apps"
     mkdir -p "$out_dir"
-    out="$out_dir/hardlinkmgr.png"
+    out="$out_dir/smbmgr.png"
     echo "Generating $out"
     magick "$src" -resize "${size}x${size}" "$out"
 done

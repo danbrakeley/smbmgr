@@ -15,7 +15,7 @@
 #include "common/TestMain.h"
 
 // One file-browser view against the Samba fixture: navigation, filter, status
-// bar, and the lazy link-count fill-in (throttled via HLM_STAT_DELAY_MS to
+// bar, and the lazy link-count fill-in (throttled via SMBMGR_STAT_DELAY_MS to
 // make it observable).
 class TestFileBrowserView : public QObject
 {
@@ -42,7 +42,7 @@ private:
 void TestFileBrowserView::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 QString TestFileBrowserView::linksTextAt(QTreeView *tree, int proxyRow)
@@ -226,9 +226,9 @@ void TestFileBrowserView::statPumpFillsAndDrains()
     m_fx.seedManyFiles(dir, 80, 32);
     m_fx.makeHardLink(dir + "/f1.bin", dir + "/f1_link.bin");
 
-    qputenv("HLM_STAT_DELAY_MS", "50"); // read once in the session ctor
+    qputenv("SMBMGR_STAT_DELAY_MS", "50"); // read once in the session ctor
     SmbSession session;
-    qunsetenv("HLM_STAT_DELAY_MS");
+    qunsetenv("SMBMGR_STAT_DELAY_MS");
     QVERIFY(m_fx.connectForTest(session));
 
     FileBrowserView view(&session);
@@ -282,9 +282,9 @@ void TestFileBrowserView::navigationCancelsFill()
     const QString small = m_fx.makeCaseDir("cancelfill_small");
     m_fx.seedFile(small, "only.bin", 16);
 
-    qputenv("HLM_STAT_DELAY_MS", "50");
+    qputenv("SMBMGR_STAT_DELAY_MS", "50");
     SmbSession session;
-    qunsetenv("HLM_STAT_DELAY_MS");
+    qunsetenv("SMBMGR_STAT_DELAY_MS");
     QVERIFY(m_fx.connectForTest(session));
 
     FileBrowserView view(&session);
@@ -309,9 +309,9 @@ void TestFileBrowserView::disconnectMidFill()
     const QString dir = m_fx.makeCaseDir("disconnectfill");
     m_fx.seedManyFiles(dir, 60, 16);
 
-    qputenv("HLM_STAT_DELAY_MS", "50");
+    qputenv("SMBMGR_STAT_DELAY_MS", "50");
     SmbSession session;
-    qunsetenv("HLM_STAT_DELAY_MS");
+    qunsetenv("SMBMGR_STAT_DELAY_MS");
     QVERIFY(m_fx.connectForTest(session));
 
     FileBrowserView view(&session);
@@ -329,6 +329,6 @@ void TestFileBrowserView::disconnectMidFill()
     QTRY_COMPARE(view.findChild<QTreeView *>("fbv.tree")->model()->rowCount(), 60);
 }
 
-HLM_TEST_MAIN(TestFileBrowserView)
+SMBMGR_TEST_MAIN(TestFileBrowserView)
 
 #include "tst_filebrowserview.moc"

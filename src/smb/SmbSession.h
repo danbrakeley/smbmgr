@@ -155,7 +155,7 @@ private:
     QTimer *m_tickTimer = nullptr;
     qintptr m_fd = -1;
     State m_state = State::Disconnected;
-    int m_statDelayMs = 0; // debug throttle, see HLM_STAT_DELAY_MS
+    int m_statDelayMs = 0; // debug throttle, see SMBMGR_STAT_DELAY_MS
     bool m_teardownPending = false;
     bool m_inTeardown = false;
     bool m_inService = false; // inside smb2_service(); teardown must defer

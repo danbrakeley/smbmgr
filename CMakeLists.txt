@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(hardlinkmgr
-        VERSION 0.3.1
+project(smbmgr
+        VERSION 0.4.0
         DESCRIPTION "GUI tool for manual SMB hard-link deduplication"
         LANGUAGES C CXX)
 
@@ -15,7 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Compile a single target's source files concurrently (MSVC defaults to one
 # cl.exe per project). Matters most for libsmb2's ~30 .c files and
-# hardlinkmgr_core's own sources, both rebuilt from scratch on every CI run.
+# smbmgr_core's own sources, both rebuilt from scratch on every CI run.
 # Set before FetchContent_MakeAvailable(libsmb2) below so it's inherited.
 if(MSVC)
   add_compile_options(/MP)
@@ -52,7 +52,7 @@ qt_standard_project_setup()
 
 # All app code lives in a static library so the test executables under tests/
 # link the exact same objects; the app target is just main.cpp.
-qt_add_library(hardlinkmgr_core STATIC
+qt_add_library(smbmgr_core STATIC
   src/core/LinkRunner.cpp
   src/core/LinkRunner.h
   src/core/LogFormat.h
@@ -88,34 +88,34 @@ qt_add_library(hardlinkmgr_core STATIC
   resources/icons/icons.qrc
 )
 
-target_include_directories(hardlinkmgr_core PUBLIC src)
+target_include_directories(smbmgr_core PUBLIC src)
 
 # Feeds the About dialog's version and build-date labels. A custom target
 # with no declared OUTPUT, so it re-runs on every build and both values stay
 # current across incremental builds (configure-time values would go stale).
 # See cmake/GenerateBuildInfo.cmake for how the version is derived.
-set(HLM_BUILD_INFO_DIR ${CMAKE_BINARY_DIR}/generated)
-set(HLM_BUILD_INFO_HEADER ${HLM_BUILD_INFO_DIR}/BuildInfo.h)
-add_custom_target(hlm_build_info ALL
+set(SMBMGR_BUILD_INFO_DIR ${CMAKE_BINARY_DIR}/generated)
+set(SMBMGR_BUILD_INFO_HEADER ${SMBMGR_BUILD_INFO_DIR}/BuildInfo.h)
+add_custom_target(smbmgr_build_info ALL
   COMMAND ${CMAKE_COMMAND}
-          -D DST=${HLM_BUILD_INFO_HEADER}
+          -D DST=${SMBMGR_BUILD_INFO_HEADER}
           -D SRC_DIR=${CMAKE_SOURCE_DIR}
           -D FALLBACK_VERSION=${PROJECT_VERSION}
           -P ${CMAKE_SOURCE_DIR}/cmake/GenerateBuildInfo.cmake
-  BYPRODUCTS ${HLM_BUILD_INFO_HEADER}
+  BYPRODUCTS ${SMBMGR_BUILD_INFO_HEADER}
   COMMENT "Recording build info (version + build date)"
   VERBATIM)
-target_include_directories(hardlinkmgr_core PRIVATE ${HLM_BUILD_INFO_DIR})
-add_dependencies(hardlinkmgr_core hlm_build_info)
+target_include_directories(smbmgr_core PRIVATE ${SMBMGR_BUILD_INFO_DIR})
+add_dependencies(smbmgr_core smbmgr_build_info)
 
 # AUTORCC: qt_standard_project_setup() doesn't enable it, and without it
 # resources/icons/icons.qrc would be an inert source file instead of going
 # through rcc. Because the qrc sits in a static library, the linker may drop
 # its self-registration object, so every executable calls
 # Q_INIT_RESOURCE(icons) to force it in (src/main.cpp, tests/common/TestMain.h).
-set_target_properties(hardlinkmgr_core PROPERTIES AUTORCC ON)
+set_target_properties(smbmgr_core PROPERTIES AUTORCC ON)
 
-target_link_libraries(hardlinkmgr_core PUBLIC
+target_link_libraries(smbmgr_core PUBLIC
   Qt6::Widgets
   Qt6::Network   # QHostInfo: async DNS ahead of libsmb2's blocking resolver
   Qt6::Svg       # renders the toolbar/action icons in resources/icons
@@ -129,36 +129,36 @@ target_link_libraries(hardlinkmgr_core PUBLIC
 # std::min/std::max and numeric_limits<>::max(). PUBLIC because the executables
 # include <winsock2.h> themselves (src/main.cpp, tests/common/TestMain.h).
 if(WIN32)
-  target_compile_definitions(hardlinkmgr_core PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX)
+  target_compile_definitions(smbmgr_core PUBLIC WIN32_LEAN_AND_MEAN NOMINMAX)
 
   # Executables call WSAStartup themselves (libsmb2 leaves Winsock init to the
   # app); the import library is carried here so they all link it.
-  target_link_libraries(hardlinkmgr_core PUBLIC ws2_32)
+  target_link_libraries(smbmgr_core PUBLIC ws2_32)
 endif()
 
 if(WIN32)
   # app.rc embeds resources/icons/app/app.ico as the exe's icon (Explorer,
   # taskbar, Start Menu, Alt-Tab); scripts/gen-app-icons.sh regenerates it.
-  qt_add_executable(hardlinkmgr src/main.cpp resources/icons/app/app.rc)
+  qt_add_executable(smbmgr src/main.cpp resources/icons/app/app.rc)
 else()
-  qt_add_executable(hardlinkmgr src/main.cpp)
+  qt_add_executable(smbmgr src/main.cpp)
 endif()
 
 # GUI app: no console window on Windows.
-set_target_properties(hardlinkmgr PROPERTIES WIN32_EXECUTABLE ON)
+set_target_properties(smbmgr PROPERTIES WIN32_EXECUTABLE ON)
 
-target_link_libraries(hardlinkmgr PRIVATE hardlinkmgr_core)
+target_link_libraries(smbmgr PRIVATE smbmgr_core)
 
 if(WIN32)
   # Stage Qt's runtime DLLs (and plugins) next to the exe after each build so it
   # runs / double-clicks without Qt on PATH. windeployqt auto-detects the build
   # config from the binary.
-  add_custom_command(TARGET hardlinkmgr POST_BUILD
+  add_custom_command(TARGET smbmgr POST_BUILD
     COMMAND Qt6::windeployqt
             --no-translations
             --no-compiler-runtime
-            "$<TARGET_FILE:hardlinkmgr>"
-    COMMENT "Deploying Qt runtime dependencies next to hardlinkmgr.exe"
+            "$<TARGET_FILE:smbmgr>"
+    COMMENT "Deploying Qt runtime dependencies next to smbmgr.exe"
     VERBATIM)
 endif()
 
@@ -167,7 +167,7 @@ endif()
 # labeled "docker" additionally need the Samba fixture (see tests/docker/).
 # EXCLUDE_FROM_ALL keeps the tst_* executables off the default ALL target, so
 # an ordinary `cmake --build` (app dev loop, release packaging) only builds
-# hardlinkmgr — build the "hlm_tests" target first to run the suite.
+# smbmgr — build the "smbmgr_tests" target first to run the suite.
 # ---------------------------------------------------------------------------
 include(CTest)
 if(BUILD_TESTING)
@@ -188,21 +188,21 @@ if(UNIX AND NOT APPLE)
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install prefix" FORCE)
   endif()
 
-  install(TARGETS hardlinkmgr RUNTIME DESTINATION bin)
+  install(TARGETS smbmgr RUNTIME DESTINATION bin)
 
   # Desktop entry + hicolor icon set (generated by scripts/gen-app-icons.sh)
-  # so hardlinkmgr shows up with its icon in application launchers/menus.
+  # so smbmgr shows up with its icon in application launchers/menus.
   # hicolor-icon-theme isn't declared as a dependency: it's effectively
   # universal on desktop Linux, and CPACK_DEBIAN_PACKAGE_SHLIBDEPS below only
   # covers shared-library deps.
-  install(FILES resources/linux/hardlinkmgr.desktop DESTINATION share/applications)
+  install(FILES resources/linux/smbmgr.desktop DESTINATION share/applications)
   install(DIRECTORY resources/icons/app/hicolor/ DESTINATION share/icons/hicolor)
 
   # AppStream MetaInfo: App Center's local-.deb install card (name + icon
   # above the Install button) is built from this, not from the .desktop file
   # or icon theme directly — without it, App Center shows a generic package
   # icon even though the launcher/menu icon above is already correct.
-  install(FILES resources/linux/hardlinkmgr.metainfo.xml DESTINATION share/metainfo)
+  install(FILES resources/linux/smbmgr.metainfo.xml DESTINATION share/metainfo)
 
   set(CPACK_GENERATOR "DEB")
   set(CPACK_PACKAGE_CONTACT "Dan Brakeley <deb@aliencamel.com>")

@@ -1,4 +1,4 @@
-# Hard Link Manager <!-- omit in toc -->
+# SMB Manager <!-- omit in toc -->
 
 - [Overview](#overview)
 - [Original Problem](#original-problem)
@@ -12,7 +12,7 @@
 
 ## Overview
 
-Hard Link Manager allows you to connect to a remote SMB server, view
+SMB Manager allows you to connect to a remote SMB server, view
 files/folders details including inode numbers and hard link counts, and then
 find possible duplicate files and replace one with a link to the other.
 
@@ -69,8 +69,8 @@ cross-platform way.
 $ make help
 Targets:
   configure  - regenerate CMake's build files (run after editing CMakeLists.txt)
-  release    - build hardlinkmgr (Release, app only)
-  debug      - build hardlinkmgr (Debug, app only)
+  release    - build smbmgr (Release, app only)
+  debug      - build smbmgr (Debug, app only)
   test-unit  - build + run the serverless unit suite
   test-all   - build + run every suite (needs Docker)
   clean      - remove the build/ directory
@@ -93,7 +93,7 @@ Targets:
 - To use the Makefile, I installed `make` via [scoop](https://scoop.sh/).
 - To run the integration tests, you'll need [Docker](https://docs.docker.com/desktop/setup/install/windows-install/) installed and running.
 
-Builds end up in `build\windows\bin\{Release|Debug}\hardlinkmgr.exe`. Required Qt .dlls are copied into the same folder.
+Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into the same folder.
 
 ### Linux
 

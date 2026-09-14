@@ -152,7 +152,7 @@ SmbSession::SmbSession(QObject *parent)
     // each stat by N ms before it is sent, simulating a slow server. Each
     // delayed stat keeps holding its slot in the view's in-flight window, so
     // throughput becomes ~(window / delay) stats per second.
-    m_statDelayMs = qEnvironmentVariableIntValue("HLM_STAT_DELAY_MS");
+    m_statDelayMs = qEnvironmentVariableIntValue("SMBMGR_STAT_DELAY_MS");
 }
 
 SmbSession::~SmbSession()

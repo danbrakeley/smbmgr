@@ -101,6 +101,6 @@ void TestPathUtil::nameOf()
     QCOMPARE(pathutil::nameOf(path), expected);
 }
 
-HLM_TEST_MAIN(TestPathUtil)
+SMBMGR_TEST_MAIN(TestPathUtil)
 
 #include "tst_pathutil.moc"

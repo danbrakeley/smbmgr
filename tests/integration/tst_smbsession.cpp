@@ -30,7 +30,7 @@ private:
 void TestSmbSession::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 void TestSmbSession::connectAndDisconnect()
@@ -212,9 +212,9 @@ void TestSmbSession::disconnectWithStatsInFlight()
     const QString dir = m_fx.makeCaseDir("midfill");
     m_fx.seedManyFiles(dir, 40, 32);
 
-    qputenv("HLM_STAT_DELAY_MS", "100"); // read once in the ctor below
+    qputenv("SMBMGR_STAT_DELAY_MS", "100"); // read once in the ctor below
     SmbSession session;
-    qunsetenv("HLM_STAT_DELAY_MS");
+    qunsetenv("SMBMGR_STAT_DELAY_MS");
 
     QVERIFY(m_fx.connectForTest(session));
     for (int i = 1; i <= 40; ++i) {
@@ -232,6 +232,6 @@ void TestSmbSession::disconnectWithStatsInFlight()
     QTRY_COMPARE(listedSpy.count(), 1);
 }
 
-HLM_TEST_MAIN(TestSmbSession)
+SMBMGR_TEST_MAIN(TestSmbSession)
 
 #include "tst_smbsession.moc"

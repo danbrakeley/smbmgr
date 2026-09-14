@@ -69,7 +69,7 @@ jobs:
       - name: Build tests
         # The Visual Studio generator needs the subdirectory-qualified target
         # name. Unit suites only: this runner can't run the docker ones.
-        run: cmake --build --preset windows-debug --target tests/hlm_tests_unit --parallel
+        run: cmake --build --preset windows-debug --target tests/smbmgr_tests_unit --parallel
 
       - name: Run tests
         # windows-all needs Docker, and GitHub's windows runners can't run the
@@ -79,21 +79,21 @@ jobs:
         run: ctest --preset windows-unit
 
       - name: Build release
-        # --target hardlinkmgr: only the app is part of the shipped artifact;
+        # --target smbmgr: only the app is part of the shipped artifact;
         # the tst_* suites above were already excluded from ALL and only get
         # built on request (see EXCLUDE_FROM_ALL in the top-level CMakeLists.txt).
-        run: cmake --build --preset windows-release --target hardlinkmgr --parallel
+        run: cmake --build --preset windows-release --target smbmgr --parallel
 
       - name: Package
         shell: pwsh
         run: |
-          Copy-Item -Recurse "build/windows/bin/Release" "hardlinkmgr-windows-x64"
-          Compress-Archive -Path "hardlinkmgr-windows-x64" -DestinationPath "hardlinkmgr-windows-x64.zip"
+          Copy-Item -Recurse "build/windows/bin/Release" "smbmgr-windows-x64"
+          Compress-Archive -Path "smbmgr-windows-x64" -DestinationPath "smbmgr-windows-x64.zip"
 
       - uses: actions/upload-artifact@v7
         with:
           name: windows-release
-          path: hardlinkmgr-windows-x64.zip
+          path: smbmgr-windows-x64.zip
 
   linux:
     needs: check-version
@@ -113,9 +113,9 @@ jobs:
         run: cmake --preset linux-debug
 
       - name: Build tests
-        # hlm_tests (not hlm_tests_unit): linux-all below runs the full suite
+        # smbmgr_tests (not smbmgr_tests_unit): linux-all below runs the full suite
         # including the docker-fixture suites, so all of them need building.
-        run: cmake --build --preset linux-debug --target hlm_tests --parallel
+        run: cmake --build --preset linux-debug --target smbmgr_tests --parallel
 
       - name: Run tests
         # linux-all: the ubuntu runner has Docker + Compose v2 preinstalled, so
@@ -127,9 +127,9 @@ jobs:
         run: cmake --preset linux-release
 
       - name: Build release
-        # --target hardlinkmgr: see the equivalent comment in the windows job —
+        # --target smbmgr: see the equivalent comment in the windows job —
         # only the app ships, tests are excluded from ALL and built on request.
-        run: cmake --build --preset linux-release --target hardlinkmgr --parallel
+        run: cmake --build --preset linux-release --target smbmgr --parallel
 
       - name: Package .deb
         run: |

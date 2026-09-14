@@ -13,10 +13,10 @@ class SmbSession;
 // has no file-creation API, and the container-side `stat` is the ground truth
 // the SMB results are compared against.
 //
-//   HLM_TEST_SMB_URL        default smb://hlmtest@localhost:10445/share
-//   HLM_TEST_SMB_PASSWORD   default hlmtest
-//   HLM_TEST_SMB_CONTAINER  default hlm-test-samba
-//   HLM_TEST_SMB_STRICT     "1": fail instead of skip when the server is down
+//   SMBMGR_TEST_SMB_URL        default smb://smbmgrtest@localhost:10445/share
+//   SMBMGR_TEST_SMB_PASSWORD   default smbmgrtest
+//   SMBMGR_TEST_SMB_CONTAINER  default smbmgr-test-samba
+//   SMBMGR_TEST_SMB_STRICT     "1": fail instead of skip when the server is down
 //
 // Every fixture instance namespaces its files under a unique run directory,
 // so suites are order-independent and safe under `ctest -j`; the volume is
@@ -37,7 +37,7 @@ public:
     // --- out-of-band share manipulation; paths are share-absolute ----------
 
     // Creates (and returns) this run's unique directory for one test case,
-    // e.g. "/hlm-1a2b3c4d/rename". Nested names ("list/sub") are allowed.
+    // e.g. "/smbmgr-1a2b3c4d/rename". Nested names ("list/sub") are allowed.
     QString makeCaseDir(const QString &caseName);
     void makeDir(const QString &sharePath);
     void seedFile(const QString &shareDir, const QString &name, qint64 size,
@@ -70,13 +70,13 @@ private:
 };
 
 // QSKIP/QFAIL only work inside the running test function, hence a macro. Use
-// in initTestCase() to skip (or, under HLM_TEST_SMB_STRICT=1, fail) the whole
+// in initTestCase() to skip (or, under SMBMGR_TEST_SMB_STRICT=1, fail) the whole
 // suite when the fixture isn't up.
-#define HLM_CONNECT_OR_SKIP(fixture, session)                                   \
+#define SMBMGR_CONNECT_OR_SKIP(fixture, session)                                \
     do {                                                                        \
         if (!(fixture).connectForTest(session)) {                               \
             if ((fixture).strict()) {                                           \
-                QFAIL("SMB test server unreachable (HLM_TEST_SMB_STRICT=1)");    \
+                QFAIL("SMB test server unreachable (SMBMGR_TEST_SMB_STRICT=1)"); \
             } else {                                                            \
                 QSKIP("SMB test server unreachable — is the Samba fixture up? " \
                       "(docker compose -f tests/docker/docker-compose.yml "     \

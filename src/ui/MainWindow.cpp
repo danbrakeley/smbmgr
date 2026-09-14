@@ -25,7 +25,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setWindowTitle(tr("Hard Link Manager"));
+    setWindowTitle(tr("SMB Manager"));
 
     m_session = new SmbSession(this);
     connect(m_session, &SmbSession::stateChanged,

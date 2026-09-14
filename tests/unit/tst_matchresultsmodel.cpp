@@ -168,6 +168,6 @@ void TestMatchResultsModel::setMatchesClearsChecks()
              int(Qt::Unchecked));
 }
 
-HLM_TEST_MAIN(TestMatchResultsModel)
+SMBMGR_TEST_MAIN(TestMatchResultsModel)
 
 #include "tst_matchresultsmodel.moc"

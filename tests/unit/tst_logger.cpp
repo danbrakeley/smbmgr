@@ -108,6 +108,6 @@ void TestLogger::emitsEntryLoggedWithoutFile()
     QCOMPARE(entry.value("n").toInt(), 3);
 }
 
-HLM_TEST_MAIN(TestLogger)
+SMBMGR_TEST_MAIN(TestLogger)
 
 #include "tst_logger.moc"

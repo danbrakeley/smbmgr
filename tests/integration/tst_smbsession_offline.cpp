@@ -63,6 +63,6 @@ void TestSmbSessionOffline::abortMidConnect()
     QCOMPARE(session.state(), SmbSession::State::Disconnected);
 }
 
-HLM_TEST_MAIN(TestSmbSessionOffline)
+SMBMGR_TEST_MAIN(TestSmbSessionOffline)
 
 #include "tst_smbsession_offline.moc"

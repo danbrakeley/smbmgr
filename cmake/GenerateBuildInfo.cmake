@@ -1,5 +1,5 @@
 # Writes BuildInfo.h with APP_VERSION and APP_BUILD_DATE. Invoked as a
-# build-time (not configure-time) step -- see the "hlm_build_info" custom
+# build-time (not configure-time) step -- see the "smbmgr_build_info" custom
 # target in the top-level CMakeLists.txt -- so both values reflect the
 # actual build, not just the last `cmake --preset` configure: the build date
 # would otherwise go stale across incremental builds, and the version
@@ -18,57 +18,57 @@
 # not exactly that tag, then "-dev" is appended if the working tree has
 # uncommitted changes (staged or not).
 
-string(TIMESTAMP HLM_BUILD_DATE "%Y-%m-%d %H:%M UTC" UTC)
+string(TIMESTAMP SMBMGR_BUILD_DATE "%Y-%m-%d %H:%M UTC" UTC)
 
-set(HLM_VERSION "${FALLBACK_VERSION}")
+set(SMBMGR_VERSION "${FALLBACK_VERSION}")
 
-find_program(HLM_GIT_EXECUTABLE git)
-if(HLM_GIT_EXECUTABLE)
+find_program(SMBMGR_GIT_EXECUTABLE git)
+if(SMBMGR_GIT_EXECUTABLE)
   execute_process(
-    COMMAND "${HLM_GIT_EXECUTABLE}" describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --abbrev=0
+    COMMAND "${SMBMGR_GIT_EXECUTABLE}" describe --tags --match "v[0-9]*.[0-9]*.[0-9]*" --abbrev=0
     WORKING_DIRECTORY "${SRC_DIR}"
-    OUTPUT_VARIABLE HLM_LAST_TAG
+    OUTPUT_VARIABLE SMBMGR_LAST_TAG
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET
-    RESULT_VARIABLE HLM_DESCRIBE_RESULT)
+    RESULT_VARIABLE SMBMGR_DESCRIBE_RESULT)
 
-  if(HLM_DESCRIBE_RESULT EQUAL 0 AND HLM_LAST_TAG MATCHES "^v(.+)$")
-    set(HLM_VERSION "${CMAKE_MATCH_1}")
+  if(SMBMGR_DESCRIBE_RESULT EQUAL 0 AND SMBMGR_LAST_TAG MATCHES "^v(.+)$")
+    set(SMBMGR_VERSION "${CMAKE_MATCH_1}")
 
     execute_process(
-      COMMAND "${HLM_GIT_EXECUTABLE}" rev-list "${HLM_LAST_TAG}..HEAD" --count
+      COMMAND "${SMBMGR_GIT_EXECUTABLE}" rev-list "${SMBMGR_LAST_TAG}..HEAD" --count
       WORKING_DIRECTORY "${SRC_DIR}"
-      OUTPUT_VARIABLE HLM_COMMITS_SINCE_TAG
+      OUTPUT_VARIABLE SMBMGR_COMMITS_SINCE_TAG
       OUTPUT_STRIP_TRAILING_WHITESPACE
       ERROR_QUIET)
 
-    if(NOT HLM_COMMITS_SINCE_TAG STREQUAL "0")
+    if(NOT SMBMGR_COMMITS_SINCE_TAG STREQUAL "0")
       execute_process(
-        COMMAND "${HLM_GIT_EXECUTABLE}" rev-parse --short HEAD
+        COMMAND "${SMBMGR_GIT_EXECUTABLE}" rev-parse --short HEAD
         WORKING_DIRECTORY "${SRC_DIR}"
-        OUTPUT_VARIABLE HLM_SHORT_HASH
+        OUTPUT_VARIABLE SMBMGR_SHORT_HASH
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET)
-      if(HLM_SHORT_HASH)
-        set(HLM_VERSION "${HLM_VERSION}-${HLM_SHORT_HASH}")
+      if(SMBMGR_SHORT_HASH)
+        set(SMBMGR_VERSION "${SMBMGR_VERSION}-${SMBMGR_SHORT_HASH}")
       endif()
     endif()
   endif()
 
   execute_process(
-    COMMAND "${HLM_GIT_EXECUTABLE}" status --porcelain
+    COMMAND "${SMBMGR_GIT_EXECUTABLE}" status --porcelain
     WORKING_DIRECTORY "${SRC_DIR}"
-    OUTPUT_VARIABLE HLM_GIT_STATUS
+    OUTPUT_VARIABLE SMBMGR_GIT_STATUS
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_QUIET)
-  if(NOT HLM_GIT_STATUS STREQUAL "")
-    set(HLM_VERSION "${HLM_VERSION}-dev")
+  if(NOT SMBMGR_GIT_STATUS STREQUAL "")
+    set(SMBMGR_VERSION "${SMBMGR_VERSION}-dev")
   endif()
 endif()
 
-get_filename_component(HLM_BUILD_INFO_DIR "${DST}" DIRECTORY)
-file(MAKE_DIRECTORY "${HLM_BUILD_INFO_DIR}")
+get_filename_component(SMBMGR_BUILD_INFO_DIR "${DST}" DIRECTORY)
+file(MAKE_DIRECTORY "${SMBMGR_BUILD_INFO_DIR}")
 file(WRITE "${DST}"
   "#pragma once\n"
-  "#define APP_VERSION \"${HLM_VERSION}\"\n"
-  "#define APP_BUILD_DATE \"${HLM_BUILD_DATE}\"\n")
+  "#define APP_VERSION \"${SMBMGR_VERSION}\"\n"
+  "#define APP_BUILD_DATE \"${SMBMGR_BUILD_DATE}\"\n")

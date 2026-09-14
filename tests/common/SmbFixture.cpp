@@ -18,16 +18,16 @@ QString envOr(const char *name, const QString &fallback)
 } // namespace
 
 SmbFixture::SmbFixture()
-    : m_url(envOr("HLM_TEST_SMB_URL", "smb://hlmtest@localhost:10445/share"))
-    , m_password(envOr("HLM_TEST_SMB_PASSWORD", "hlmtest"))
-    , m_container(envOr("HLM_TEST_SMB_CONTAINER", "hlm-test-samba"))
-    , m_runRoot("/hlm-" + QUuid::createUuid().toString(QUuid::Id128).left(12))
+    : m_url(envOr("SMBMGR_TEST_SMB_URL", "smb://smbmgrtest@localhost:10445/share"))
+    , m_password(envOr("SMBMGR_TEST_SMB_PASSWORD", "smbmgrtest"))
+    , m_container(envOr("SMBMGR_TEST_SMB_CONTAINER", "smbmgr-test-samba"))
+    , m_runRoot("/smbmgr-" + QUuid::createUuid().toString(QUuid::Id128).left(12))
 {
 }
 
 bool SmbFixture::strict() const
 {
-    return qgetenv("HLM_TEST_SMB_STRICT") == "1";
+    return qgetenv("SMBMGR_TEST_SMB_STRICT") == "1";
 }
 
 bool SmbFixture::connectForTest(SmbSession &session, int timeoutMs)
@@ -35,7 +35,7 @@ bool SmbFixture::connectForTest(SmbSession &session, int timeoutMs)
     QString error;
     const auto spec = SmbShareSpec::fromUrl(QUrl(m_url), &error);
     if (!spec) {
-        qWarning("SmbFixture: bad HLM_TEST_SMB_URL %s: %s",
+        qWarning("SmbFixture: bad SMBMGR_TEST_SMB_URL %s: %s",
                  qPrintable(m_url), qPrintable(error));
         return false;
     }
@@ -94,7 +94,7 @@ void SmbFixture::makeDir(const QString &sharePath)
     // chown -R from the run root: mkdir -p may have created root-owned
     // parents, and the SMB user needs directory write permission for
     // create/rename/unlink.
-    shell(QStringLiteral("mkdir -p %1 && chown -R hlmtest:hlmtest %2")
+    shell(QStringLiteral("mkdir -p %1 && chown -R smbmgrtest:smbmgrtest %2")
               .arg(quoted(sharePath), quoted(m_runRoot)));
 }
 
@@ -103,7 +103,7 @@ void SmbFixture::seedFile(const QString &shareDir, const QString &name,
 {
     const QString path = shareDir + QLatin1Char('/') + name;
     shell(QStringLiteral("head -c %1 /dev/zero | tr '\\0' '%2' > %3 "
-                         "&& chown hlmtest:hlmtest %3")
+                         "&& chown smbmgrtest:smbmgrtest %3")
               .arg(size)
               .arg(QLatin1Char(fill))
               .arg(quoted(path)));
@@ -113,7 +113,7 @@ void SmbFixture::seedManyFiles(const QString &shareDir, int count, qint64 size)
 {
     shell(QStringLiteral("cd %1 && for i in $(seq 1 %2); do "
                          "head -c %3 /dev/zero | tr '\\0' 'a' > f$i.bin; done "
-                         "&& chown -R hlmtest:hlmtest .")
+                         "&& chown -R smbmgrtest:smbmgrtest .")
               .arg(quoted(shareDir))
               .arg(count)
               .arg(size));
@@ -123,7 +123,7 @@ void SmbFixture::seedManyDirs(const QString &shareDir, int dirCount, qint64 file
 {
     shell(QStringLiteral("cd %1 && for i in $(seq 1 %2); do mkdir -p d$i; "
                          "head -c %3 /dev/zero | tr '\\0' 'a' > d$i/f.bin; done "
-                         "&& chown -R hlmtest:hlmtest .")
+                         "&& chown -R smbmgrtest:smbmgrtest .")
               .arg(quoted(shareDir))
               .arg(dirCount)
               .arg(fileSize));

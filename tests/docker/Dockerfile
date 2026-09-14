@@ -11,11 +11,11 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends samba smbclient \
  && rm -rf /var/lib/apt/lists/*
 
-# One test user; password "hlmtest" (defaults mirrored in SmbFixture).
-RUN useradd -M -s /usr/sbin/nologin hlmtest \
- && printf 'hlmtest\nhlmtest\n' | smbpasswd -a -s hlmtest \
+# One test user; password "smbmgrtest" (defaults mirrored in SmbFixture).
+RUN useradd -M -s /usr/sbin/nologin smbmgrtest \
+ && printf 'smbmgrtest\nsmbmgrtest\n' | smbpasswd -a -s smbmgrtest \
  && mkdir -p /srv/share \
- && chown hlmtest:hlmtest /srv/share
+ && chown smbmgrtest:smbmgrtest /srv/share
 
 COPY smb.conf /etc/samba/smb.conf
 
@@ -23,6 +23,6 @@ EXPOSE 445
 
 # `docker compose up --wait` blocks on this going healthy.
 HEALTHCHECK --interval=2s --timeout=5s --retries=30 \
-  CMD smbclient //localhost/share -U hlmtest%hlmtest -c ls >/dev/null 2>&1 || exit 1
+  CMD smbclient //localhost/share -U smbmgrtest%smbmgrtest -c ls >/dev/null 2>&1 || exit 1
 
 CMD ["smbd", "--foreground", "--no-process-group", "--debug-stdout"]

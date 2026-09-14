@@ -39,6 +39,6 @@ void TestVersionCompare::isNewer()
     QCOMPARE(versioncompare::isNewer(latestTag, currentVersion), expected);
 }
 
-HLM_TEST_MAIN(TestVersionCompare)
+SMBMGR_TEST_MAIN(TestVersionCompare)
 
 #include "tst_versioncompare.moc"

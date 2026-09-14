@@ -4,7 +4,7 @@
 
 namespace {
 
-const QLatin1String kTmpSuffix(".hlmgr-tmp");
+const QLatin1String kTmpSuffix(".smbmgr-tmp");
 
 } // namespace
 

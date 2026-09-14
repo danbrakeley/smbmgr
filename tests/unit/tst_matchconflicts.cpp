@@ -66,6 +66,6 @@ void TestMatchConflicts::combination()
     QCOMPARE(c.primaryAndSecondary, QStringList({"/mid"}));
 }
 
-HLM_TEST_MAIN(TestMatchConflicts)
+SMBMGR_TEST_MAIN(TestMatchConflicts)
 
 #include "tst_matchconflicts.moc"

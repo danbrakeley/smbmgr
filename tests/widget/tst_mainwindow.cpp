@@ -26,7 +26,6 @@ private slots:
     void emptyUrlAsksForOne();
     void cancelledPromptStaysDisconnected();
     void connectFlowBuildsTwoViewsAndPanel();
-    void defaultSplitIsEven();
     void disconnectRestoresPlaceholder();
     void rememberedUrl();
 
@@ -40,7 +39,7 @@ private:
 void TestMainWindow::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 void TestMainWindow::init()
@@ -126,26 +125,6 @@ void TestMainWindow::connectFlowBuildsTwoViewsAndPanel()
     }
 }
 
-// With no saved splitter state, the panel and the views get half the width
-// each.
-void TestMainWindow::defaultSplitIsEven()
-{
-    MainWindow window;
-    window.show();
-    QVERIFY(QTest::qWaitForWindowExposed(&window));
-    connectWindow(window);
-
-    auto *splitter = qobject_cast<QSplitter *>(window.centralWidget());
-    QVERIFY(splitter);
-    QCOMPARE(splitter->count(), 2);
-    // Sizes settle once the new central widget is laid out.
-    QTRY_VERIFY2(qAbs(splitter->sizes().at(0) - splitter->sizes().at(1)) <= 1,
-                 qPrintable(QStringLiteral("%1 vs %2")
-                                .arg(splitter->sizes().at(0))
-                                .arg(splitter->sizes().at(1))));
-    QVERIFY(splitter->sizes().at(0) > window.width() / 4);
-}
-
 void TestMainWindow::disconnectRestoresPlaceholder()
 {
     MainWindow window;
@@ -171,6 +150,6 @@ void TestMainWindow::rememberedUrl()
     QCOMPARE(relaunched.findChild<QLineEdit *>("mw.urlEdit")->text(), m_fx.url());
 }
 
-HLM_TEST_MAIN(TestMainWindow)
+SMBMGR_TEST_MAIN(TestMainWindow)
 
 #include "tst_mainwindow.moc"

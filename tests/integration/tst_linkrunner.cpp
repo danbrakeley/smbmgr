@@ -45,7 +45,7 @@ private:
 void TestLinkRunner::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 TestLinkRunner::RunResult TestLinkRunner::run(SmbSession &session,
@@ -101,8 +101,8 @@ void TestLinkRunner::happyPathSingleVictim()
              m_fx.statPath(dir + "/primary.bin").inode);
     // The victim's content is now the primary's.
     QCOMPARE(m_fx.readFile(dir + "/victim.bin"), QString(100, QLatin1Char('p')));
-    // No leftover *.hlmgr-tmp.
-    QCOMPARE(m_fx.ls(dir).filter("hlmgr-tmp").size(), 0);
+    // No leftover *.smbmgr-tmp.
+    QCOMPARE(m_fx.ls(dir).filter("smbmgr-tmp").size(), 0);
 
     // The audit trail holds the three server writes, in order, as info lines
     // with the operations' paths (plus the connect lines around them).
@@ -150,7 +150,7 @@ void TestLinkRunner::multipleVictimsSequential()
     QCOMPARE(m_fx.statPath(dir + "/keep.bin").nlink, 3);
     QCOMPARE(m_fx.statPath(dir + "/v1.bin").inode, m_fx.statPath(dir + "/keep.bin").inode);
     QCOMPARE(m_fx.statPath(dir + "/v2.bin").inode, m_fx.statPath(dir + "/keep.bin").inode);
-    QCOMPARE(m_fx.ls(dir).filter("hlmgr-tmp").size(), 0);
+    QCOMPARE(m_fx.ls(dir).filter("smbmgr-tmp").size(), 0);
 }
 
 // Linking two names that are already hard links of each other must lose no
@@ -169,7 +169,7 @@ void TestLinkRunner::alreadyLinkedPair()
     QCOMPARE(m_fx.statPath(dir + "/a.bin").nlink, 2);
     QCOMPARE(m_fx.statPath(dir + "/b.bin").inode, m_fx.statPath(dir + "/a.bin").inode);
     QCOMPARE(m_fx.readFile(dir + "/b.bin"), QString(80, QLatin1Char('a')));
-    QCOMPARE(m_fx.ls(dir).filter("hlmgr-tmp").size(), 0);
+    QCOMPARE(m_fx.ls(dir).filter("smbmgr-tmp").size(), 0);
 }
 
 // A nonexistent primary lets the rename succeed and the link step fail: the
@@ -194,7 +194,7 @@ void TestLinkRunner::linkFailureRestoresOriginal()
     QVERIFY(m_fx.exists(dir + "/victim.bin"));
     QCOMPARE(m_fx.readFile(dir + "/victim.bin"), QString(70, QLatin1Char('v')));
     QCOMPARE(m_fx.statPath(dir + "/victim.bin").nlink, 1);
-    QCOMPARE(m_fx.ls(dir).filter("hlmgr-tmp").size(), 0);
+    QCOMPARE(m_fx.ls(dir).filter("smbmgr-tmp").size(), 0);
 }
 
 // If even the first step (rename) fails, the victim is untouched.
@@ -262,6 +262,6 @@ void TestLinkRunner::disconnectMidRun()
     QCOMPARE(m_fx.statPath(dir + "/v3.bin").nlink, 1);
 }
 
-HLM_TEST_MAIN(TestLinkRunner)
+SMBMGR_TEST_MAIN(TestLinkRunner)
 
 #include "tst_linkrunner.moc"

@@ -45,7 +45,7 @@ struct Result
 // In-progress LinkRunner temporaries (see LinkRunner.cpp); never candidates.
 inline bool isTmpName(const QString &name)
 {
-    return name.endsWith(QLatin1String(".hlmgr-tmp"));
+    return name.endsWith(QLatin1String(".smbmgr-tmp"));
 }
 
 // Sort by size, then for each file scan the window of files within

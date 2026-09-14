@@ -148,6 +148,6 @@ void TestFileFilterProxyModel::filterIsCaseInsensitiveContains()
     QCOMPARE(proxy.rowCount(), 5);
 }
 
-HLM_TEST_MAIN(TestFileFilterProxyModel)
+SMBMGR_TEST_MAIN(TestFileFilterProxyModel)
 
 #include "tst_filefilterproxymodel.moc"

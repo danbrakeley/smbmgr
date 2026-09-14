@@ -20,12 +20,12 @@
 AboutDialog::AboutDialog(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("About Hard Link Manager"));
+    setWindowTitle(tr("About SMB Manager"));
 
     auto *iconLabel = new QLabel(this);
     iconLabel->setPixmap(QPixmap(QStringLiteral(":/icons/app/app256.png")));
 
-    auto *nameLabel = new QLabel(tr("Hard Link Manager"), this);
+    auto *nameLabel = new QLabel(tr("SMB Manager"), this);
     QFont nameFont = nameLabel->font();
     nameFont.setBold(true);
     nameFont.setPointSize(nameFont.pointSize() + 4);
@@ -40,7 +40,7 @@ AboutDialog::AboutDialog(QWidget *parent)
     auto *copyrightLabel = new QLabel(tr("© Copyright 2026 Dan Brakeley"), this);
 
     auto *githubLabel = new QLabel(
-        tr("<a href=\"https://github.com/danbrakeley/hardlinkmgr\">github.com/danbrakeley/hardlinkmgr</a>"),
+        tr("<a href=\"https://github.com/danbrakeley/smbmgr\">github.com/danbrakeley/smbmgr</a>"),
         this);
     githubLabel->setObjectName(QStringLiteral("ad.githubLink"));
     githubLabel->setTextFormat(Qt::RichText);
@@ -67,9 +67,9 @@ AboutDialog::AboutDialog(QWidget *parent)
         // "pre-release" (and 404s if every release is one). The plain list is
         // sorted newest-first and includes them.
         QNetworkRequest request(
-            QUrl(QStringLiteral("https://api.github.com/repos/danbrakeley/hardlinkmgr/releases")));
+            QUrl(QStringLiteral("https://api.github.com/repos/danbrakeley/smbmgr/releases")));
         // GitHub's API rejects requests with no User-Agent header (403).
-        request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("hardlinkmgr"));
+        request.setHeader(QNetworkRequest::UserAgentHeader, QStringLiteral("smbmgr"));
         request.setTransferTimeout(10000);
 
         QNetworkReply *reply = manager->get(request);
@@ -94,7 +94,7 @@ AboutDialog::AboutDialog(QWidget *parent)
             }
 
             const QString tagLink =
-                tr("<a href=\"https://github.com/danbrakeley/hardlinkmgr/releases/tag/%1\">%1</a>").arg(tag.toHtmlEscaped());
+                tr("<a href=\"https://github.com/danbrakeley/smbmgr/releases/tag/%1\">%1</a>").arg(tag.toHtmlEscaped());
 
             if (versioncompare::isNewer(tag, QStringLiteral(APP_VERSION))) {
                 updateStatusLabel->setText(tr("Update available: %1").arg(tagLink));

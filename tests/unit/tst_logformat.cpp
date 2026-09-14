@@ -103,6 +103,6 @@ void TestLogFormat::awkwardStringsStayOnOneLine()
     QCOMPARE(roundTrip.value("detail").toString(), awkward);
 }
 
-HLM_TEST_MAIN(TestLogFormat)
+SMBMGR_TEST_MAIN(TestLogFormat)
 
 #include "tst_logformat.moc"

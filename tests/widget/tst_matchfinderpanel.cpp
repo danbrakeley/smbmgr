@@ -46,7 +46,7 @@ private:
 void TestMatchFinderPanel::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 void TestMatchFinderPanel::init()
@@ -232,7 +232,7 @@ void TestMatchFinderPanel::linkRunWalksStatuses()
     QCOMPARE(m_fx.statPath(dir + "/s/victim.bin").inode,
              m_fx.statPath(dir + "/p/keep.bin").inode);
     QCOMPARE(m_fx.readFile(dir + "/s/victim.bin"), QString(500, QLatin1Char('k')));
-    QCOMPARE(m_fx.ls(dir + "/s").filter("hlmgr-tmp").size(), 0);
+    QCOMPARE(m_fx.ls(dir + "/s").filter("smbmgr-tmp").size(), 0);
 }
 
 void TestMatchFinderPanel::optionsPersist()
@@ -289,6 +289,6 @@ void TestMatchFinderPanel::savedPathValidation()
     QCOMPARE(QSettings().value("matchfinder/primaryPath").toString(), goodDir);
 }
 
-HLM_TEST_MAIN(TestMatchFinderPanel)
+SMBMGR_TEST_MAIN(TestMatchFinderPanel)
 
 #include "tst_matchfinderpanel.moc"

@@ -2,11 +2,11 @@
 date: 2026-07-12
 ---
 
-# Choose C++ / Qt / libsmb2 for the Hard Link Manager
+# Choose C++ / Qt / libsmb2 for the SMB Manager
 
 ## Context and Problem Statement
 
-The Hard Link Manager is a cross-platform GUI desktop app for manually
+The SMB Manager is a cross-platform GUI desktop app for manually
 deduplicating files on an SMB share by replacing near-duplicate files with hard
 links (see the project `README.md`). Before writing application code we needed to
 settle the foundational stack: the implementation language, the GUI toolkit, and
