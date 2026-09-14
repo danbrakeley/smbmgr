@@ -169,6 +169,6 @@ void TestFileListModel::setIconModeSameValueIsSilent()
     QCOMPARE(spy.count(), 0);
 }
 
-HLM_TEST_MAIN(TestFileListModel)
+SMBMGR_TEST_MAIN(TestFileListModel)
 
 #include "tst_filelistmodel.moc"

@@ -30,10 +30,9 @@ private:
 void TestSmbSession::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
-// testing.md M1 "Connect" / "Disconnect" (session layer).
 void TestSmbSession::connectAndDisconnect()
 {
     SmbSession session;
@@ -52,8 +51,7 @@ void TestSmbSession::connectAndDisconnect()
     QVERIFY(errorSpy.isEmpty());
 }
 
-// testing.md M1 "Wrong password": back to Disconnected with an
-// authentication error.
+// A wrong password returns to Disconnected with an authentication error.
 void TestSmbSession::wrongPassword()
 {
     SmbSession session;
@@ -69,9 +67,8 @@ void TestSmbSession::wrongPassword()
     QVERIFY(!errorSpy.first().at(0).toString().isEmpty());
 }
 
-// testing.md M2 "Root listing" (data layer): names, sizes, dir flags, inodes
-// from enumeration; nlink always starts unknown (SMB2 enumeration never
-// carries it).
+// Names, sizes, dir flags, and inodes come from enumeration; nlink always
+// starts unknown (SMB2 enumeration never carries it).
 void TestSmbSession::listsSeededDirectory()
 {
     const QString dir = m_fx.makeCaseDir("list");
@@ -108,7 +105,7 @@ void TestSmbSession::listsSeededDirectory()
     QCOMPARE(byName["one.bin"].inode, m_fx.statPath(dir + "/one.bin").inode);
 }
 
-// testing.md M2 "Bad path" (data layer): failure echoes the requested path.
+// A failed listing echoes the requested path.
 void TestSmbSession::listNonexistentFails()
 {
     const QString dir = m_fx.makeCaseDir("badpath");
@@ -123,8 +120,8 @@ void TestSmbSession::listNonexistentFails()
     QVERIFY(!failedSpy.first().at(1).toString().isEmpty());
 }
 
-// testing.md M3 counts: statFile is the source of nlink, and its inode agrees
-// with both enumeration and the container filesystem.
+// statFile is the source of nlink, and its inode agrees with the container
+// filesystem.
 void TestSmbSession::statReportsLinkCountAndInode()
 {
     const QString dir = m_fx.makeCaseDir("stat");
@@ -210,15 +207,14 @@ void TestSmbSession::immediateFailureCompletesAsync()
 // Regression for the smb2_destroy_context teardown gotcha (SMB2_STATUS_
 // SHUTDOWN flushes pending callbacks): disconnecting with a pipeline of
 // throttled stats in flight must not crash, and the session must reconnect.
-// testing.md M3 "Disconnect mid-fill" (session layer).
 void TestSmbSession::disconnectWithStatsInFlight()
 {
     const QString dir = m_fx.makeCaseDir("midfill");
     m_fx.seedManyFiles(dir, 40, 32);
 
-    qputenv("HLM_STAT_DELAY_MS", "100"); // read once in the ctor below
+    qputenv("SMBMGR_STAT_DELAY_MS", "100"); // read once in the ctor below
     SmbSession session;
-    qunsetenv("HLM_STAT_DELAY_MS");
+    qunsetenv("SMBMGR_STAT_DELAY_MS");
 
     QVERIFY(m_fx.connectForTest(session));
     for (int i = 1; i <= 40; ++i) {
@@ -236,6 +232,6 @@ void TestSmbSession::disconnectWithStatsInFlight()
     QTRY_COMPARE(listedSpy.count(), 1);
 }
 
-HLM_TEST_MAIN(TestSmbSession)
+SMBMGR_TEST_MAIN(TestSmbSession)
 
 #include "tst_smbsession.moc"

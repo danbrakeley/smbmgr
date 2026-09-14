@@ -7,8 +7,8 @@ ifeq ($(OS),Windows_NT)
   CONFIGURE_CMD    := cmake --preset windows
   RELEASE_PRESET   := windows-release
   DEBUG_PRESET     := windows-debug
-  TEST_UNIT_TARGET := tests/hlm_tests_unit
-  TEST_ALL_TARGET  := tests/hlm_tests
+  TEST_UNIT_TARGET := tests/smbmgr_tests_unit
+  TEST_ALL_TARGET  := tests/smbmgr_tests
   TEST_UNIT_PRESET := windows-unit
   TEST_ALL_PRESET  := windows-all
 else
@@ -17,8 +17,8 @@ else
   CONFIGURE_CMD    := cmake --preset linux-debug && cmake --preset linux-release
   RELEASE_PRESET   := linux-release
   DEBUG_PRESET     := linux-debug
-  TEST_UNIT_TARGET := hlm_tests_unit
-  TEST_ALL_TARGET  := hlm_tests
+  TEST_UNIT_TARGET := smbmgr_tests_unit
+  TEST_ALL_TARGET  := smbmgr_tests
   TEST_UNIT_PRESET := linux-unit
   TEST_ALL_PRESET  := linux-all
 endif
@@ -28,8 +28,8 @@ endif
 help:
 	@echo "Targets:"
 	@echo "  configure  - regenerate CMake's build files (run after editing CMakeLists.txt)"
-	@echo "  release    - build hardlinkmgr (Release, app only)"
-	@echo "  debug      - build hardlinkmgr (Debug, app only)"
+	@echo "  release    - build smbmgr (Release, app only)"
+	@echo "  debug      - build smbmgr (Debug, app only)"
 	@echo "  test-unit  - build + run the serverless unit suite"
 	@echo "  test-all   - build + run every suite (needs Docker)"
 	@echo "  clean      - remove the build/ directory"
@@ -38,10 +38,10 @@ configure:
 	$(CONFIGURE_CMD)
 
 release:
-	cmake --build --preset $(RELEASE_PRESET) --target hardlinkmgr --parallel
+	cmake --build --preset $(RELEASE_PRESET) --target smbmgr --parallel
 
 debug:
-	cmake --build --preset $(DEBUG_PRESET) --target hardlinkmgr --parallel
+	cmake --build --preset $(DEBUG_PRESET) --target smbmgr --parallel
 
 test-unit:
 	cmake --build --preset $(DEBUG_PRESET) --target $(TEST_UNIT_TARGET) --parallel

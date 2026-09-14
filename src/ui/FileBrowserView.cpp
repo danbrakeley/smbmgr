@@ -236,11 +236,9 @@ void FileBrowserView::setIconMode(FileListModel::IconMode mode)
 {
     m_model->setIconMode(mode);
 
-    // setChecked() only emits toggled(), never triggered() (which is what
-    // the actions' iconModeChangeRequested connections listen to), so this
-    // can't re-enter MainWindow's broadcast loop. Leaving toggled()
-    // unblocked matters: QActionGroup's own exclusivity enforcement listens
-    // to it to uncheck the sibling action.
+    // setChecked() doesn't emit triggered(), so this can't re-enter
+    // MainWindow's broadcast. Don't block signals: QActionGroup relies on them
+    // to uncheck the sibling action.
     QAction *checkedAction = mode == FileListModel::IconMode::Os
         ? m_viewIconsOsAction
         : m_viewIconsGenericAction;

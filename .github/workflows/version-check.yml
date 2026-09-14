@@ -1,8 +1,8 @@
 name: PR Version Check
 
-# New policy: every PR into main must bump CMakeLists.txt's VERSION. Releases
-# are still cut by hand and won't happen for every merge, but every commit on
-# main needs to be able to produce a uniquely-versioned build.
+# Every PR into main must bump CMakeLists.txt's VERSION. Releases are cut by
+# hand and won't happen for every merge, but every commit on main needs to be
+# able to produce a uniquely-versioned build.
 on:
   pull_request:
     branches: [main]

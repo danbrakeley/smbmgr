@@ -14,8 +14,8 @@ private slots:
     void abortMidConnect();
 };
 
-// testing.md M1 "Unresolvable host": the attempt fails on its own with a
-// resolve error, without blocking the event loop.
+// An unresolvable host fails on its own with a resolve error, without blocking
+// the event loop.
 void TestSmbSessionOffline::unresolvableHost()
 {
     SmbSession session;
@@ -33,8 +33,7 @@ void TestSmbSessionOffline::unresolvableHost()
     QVERIFY(!errorSpy.first().at(0).toString().isEmpty());
 }
 
-// testing.md M1 "Abort mid-attempt": abort during a hanging TCP connect
-// returns to Disconnected immediately.
+// Aborting during a hanging TCP connect returns to Disconnected immediately.
 void TestSmbSessionOffline::abortMidConnect()
 {
     SmbSession session;
@@ -64,6 +63,6 @@ void TestSmbSessionOffline::abortMidConnect()
     QCOMPARE(session.state(), SmbSession::State::Disconnected);
 }
 
-HLM_TEST_MAIN(TestSmbSessionOffline)
+SMBMGR_TEST_MAIN(TestSmbSessionOffline)
 
 #include "tst_smbsession_offline.moc"

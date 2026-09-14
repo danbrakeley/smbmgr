@@ -8,16 +8,16 @@
 # files with `docker exec` (see tests/common/SmbFixture.h).
 #
 # Host port 10445: Windows itself owns port 445. The app's URL syntax carries
-# the port: smb://hlmtest@localhost:10445/share (password: hlmtest).
+# the port: smb://smbmgrtest@localhost:10445/share (password: smbmgrtest).
 
 services:
   samba:
     build: .
-    container_name: hlm-test-samba
+    container_name: smbmgr-test-samba
     ports:
       - "10445:445"
     volumes:
-      - hlm_share:/srv/share
+      - smbmgr_share:/srv/share
 
 volumes:
-  hlm_share:
+  smbmgr_share:

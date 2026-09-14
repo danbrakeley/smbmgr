@@ -108,6 +108,6 @@ void TestSmbShareSpec::hostPortForms()
     QCOMPARE(spec.hostPort(), "[fe80::1]");
 }
 
-HLM_TEST_MAIN(TestSmbShareSpec)
+SMBMGR_TEST_MAIN(TestSmbShareSpec)
 
 #include "tst_smbsharespec.moc"

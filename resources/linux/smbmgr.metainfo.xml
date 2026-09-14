@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>hardlinkmgr</id>
-  <name>Hard Link Manager</name>
+  <id>smbmgr</id>
+  <name>SMB Manager</name>
   <summary>Manually deduplicate files on an SMB share by replacing near-duplicates with hard links</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   <description>
     <p>
-      Hard Link Manager is a GUI desktop app for manually deduplicating files on an SMB share.
+      SMB Manager is a GUI desktop app for manually deduplicating files on an SMB share.
       Unlike tools that hash file contents to find exact duplicates, it lets the user manually
       select which files are "the same" (even when sizes differ slightly), pick a primary copy
       to keep, and replace the others with hard links to it.
     </p>
   </description>
-  <launchable type="desktop-id">hardlinkmgr.desktop</launchable>
-  <icon type="stock">hardlinkmgr</icon>
-  <url type="homepage">https://github.com/danbrakeley/hardlinkmgr</url>
+  <launchable type="desktop-id">smbmgr.desktop</launchable>
+  <icon type="stock">smbmgr</icon>
+  <url type="homepage">https://github.com/danbrakeley/smbmgr</url>
   <categories>
     <category>Utility</category>
   </categories>

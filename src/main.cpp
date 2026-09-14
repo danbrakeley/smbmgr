@@ -10,7 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    // The app's icons live in hardlinkmgr_core (a static library); force the
+    // The app's icons live in smbmgr_core (a static library); force the
     // linker to keep the resource's self-registration object.
     Q_INIT_RESOURCE(icons);
 
@@ -27,17 +27,16 @@ int main(int argc, char *argv[])
     // Identify the app for QSettings (remembered server URL, etc.).
     QCoreApplication::setOrganizationName(QStringLiteral("brakeley"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("brakeley.net"));
-    QCoreApplication::setApplicationName(QStringLiteral("hardlinkmgr"));
+    QCoreApplication::setApplicationName(QStringLiteral("smbmgr"));
     // On Wayland, GNOME Shell matches a running window to its .desktop entry
     // (for the taskbar/alt-tab icon) via the xdg-toplevel app_id; Qt doesn't
     // reliably derive that from applicationName(), so it must be set
-    // explicitly to match resources/linux/hardlinkmgr.desktop's install name.
-    QGuiApplication::setDesktopFileName(QStringLiteral("hardlinkmgr"));
+    // explicitly to match resources/linux/smbmgr.desktop's install name.
+    QGuiApplication::setDesktopFileName(QStringLiteral("smbmgr"));
 
-    // Audit log (docs/roadmap.md "Keep log/history of actions/errors"). Lands
-    // in %LOCALAPPDATA%\brakeley\hardlinkmgr on Windows, ~/.local/share/...
-    // on Linux; must come after the setOrganizationName/setApplicationName
-    // calls above, which determine that location.
+    // Audit log. Lands in %LOCALAPPDATA%\brakeley\smbmgr on Windows,
+    // ~/.local/share/... on Linux; must come after the setOrganizationName/
+    // setApplicationName calls above, which determine that location.
     Logger::instance().setFilePath(
         QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation)
         + QStringLiteral("/log.jsonl"));

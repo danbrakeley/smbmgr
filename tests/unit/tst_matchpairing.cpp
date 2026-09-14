@@ -161,12 +161,12 @@ void TestMatchPairing::sortedBySavings()
 
 void TestMatchPairing::tmpNames()
 {
-    QVERIFY(matchpairing::isTmpName("foo.hlmgr-tmp"));
-    QVERIFY(matchpairing::isTmpName(".hlmgr-tmp"));
+    QVERIFY(matchpairing::isTmpName("foo.smbmgr-tmp"));
+    QVERIFY(matchpairing::isTmpName(".smbmgr-tmp"));
     QVERIFY(!matchpairing::isTmpName("foo.txt"));
-    QVERIFY(!matchpairing::isTmpName("foo.hlmgr-tmp.bak"));
+    QVERIFY(!matchpairing::isTmpName("foo.smbmgr-tmp.bak"));
 }
 
-HLM_TEST_MAIN(TestMatchPairing)
+SMBMGR_TEST_MAIN(TestMatchPairing)
 
 #include "tst_matchpairing.moc"

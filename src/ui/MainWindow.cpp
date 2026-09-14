@@ -25,7 +25,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setWindowTitle(tr("Hard Link Manager"));
+    setWindowTitle(tr("SMB Manager"));
 
     m_session = new SmbSession(this);
     connect(m_session, &SmbSession::stateChanged,
@@ -228,13 +228,14 @@ void MainWindow::onSessionStateChanged(SmbSession::State state)
         m_matchPanel = new MatchFinderPanel(m_session, m_hSplitter);
         m_hSplitter->addWidget(m_matchPanel);
         m_hSplitter->addWidget(m_splitter);
-        m_hSplitter->setStretchFactor(0, 2); // views get ~2/3 by default
-        m_hSplitter->setStretchFactor(1, 1);
+        // Half the width each by default. setSizes() values act as relative
+        // weights; they only need to exceed both minimum widths, which would
+        // otherwise take precedence.
+        m_hSplitter->setSizes({10000, 10000});
         connect(m_matchPanel, &MatchFinderPanel::revealRequested,
                 this, &MainWindow::onRevealRequested);
         connect(m_matchPanel, &MatchFinderPanel::linkRunFinished, this, [this] {
-            // Same as after the Hard Link dialog: any view may be showing
-            // affected files or link counts.
+            // Any view may be showing affected files or link counts.
             for (FileBrowserView *view : std::as_const(m_views)) {
                 view->refresh();
             }
@@ -251,7 +252,7 @@ void MainWindow::onSessionStateChanged(SmbSession::State state)
             }
         }
 
-        // start with 2 views
+        // The fixed pair of views (ADR 0003).
         addView();
         addView();
 

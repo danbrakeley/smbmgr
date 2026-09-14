@@ -18,10 +18,8 @@
 #include "common/TestMain.h"
 #include "common/TestSupport.h"
 
-// The Match Finder panel driven through its widgets. Covers testing.md M7
-// "Options persist", "Saved-path validation", "Basic search" (UI wiring),
-// "Cancel mid-search" (UI), and "Check-all + link run" including the conflict
-// warning. The search/pairing engine has its own suites.
+// The Match Finder panel driven through its widgets. The search/pairing engine
+// has its own suites.
 class TestMatchFinderPanel : public QObject
 {
     Q_OBJECT
@@ -48,7 +46,7 @@ private:
 void TestMatchFinderPanel::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 void TestMatchFinderPanel::init()
@@ -234,7 +232,7 @@ void TestMatchFinderPanel::linkRunWalksStatuses()
     QCOMPARE(m_fx.statPath(dir + "/s/victim.bin").inode,
              m_fx.statPath(dir + "/p/keep.bin").inode);
     QCOMPARE(m_fx.readFile(dir + "/s/victim.bin"), QString(500, QLatin1Char('k')));
-    QCOMPARE(m_fx.ls(dir + "/s").filter("hlmgr-tmp").size(), 0);
+    QCOMPARE(m_fx.ls(dir + "/s").filter("smbmgr-tmp").size(), 0);
 }
 
 void TestMatchFinderPanel::optionsPersist()
@@ -291,6 +289,6 @@ void TestMatchFinderPanel::savedPathValidation()
     QCOMPARE(QSettings().value("matchfinder/primaryPath").toString(), goodDir);
 }
 
-HLM_TEST_MAIN(TestMatchFinderPanel)
+SMBMGR_TEST_MAIN(TestMatchFinderPanel)
 
 #include "tst_matchfinderpanel.moc"

@@ -7,13 +7,12 @@
 class SmbSession;
 
 // Replaces files with hard links, one job at a time. Per job the sequence is
-//     rename victim  -> victim.hlmgr-tmp
+//     rename victim  -> victim.smbmgr-tmp
 //     link   primary -> victim's original path
-//     unlink victim.hlmgr-tmp
+//     unlink victim.smbmgr-tmp
 // so the victim's data still exists (under the tmp name) until the link is in
 // place; a failed link renames the tmp back. Progress and outcomes are
-// reported per job index so callers can drive any UI (the Hard Link dialog's
-// status column, the Match Finder's results rows).
+// reported per job index (MatchFinderPanel maps them to its results rows).
 class LinkRunner : public QObject
 {
     Q_OBJECT

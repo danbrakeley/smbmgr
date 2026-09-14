@@ -1,3 +1,3 @@
-// Embeds the app icon into hardlinkmgr.exe (Explorer, taskbar, Start Menu,
+// Embeds the app icon into smbmgr.exe (Explorer, taskbar, Start Menu,
 // Alt-Tab). Lowest-numbered ICON resource wins as the executable's icon.
 IDI_ICON1 ICON "app.ico"

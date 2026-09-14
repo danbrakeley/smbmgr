@@ -1,4 +1,4 @@
-# Hard Link Manager <!-- omit in toc -->
+# SMB Manager <!-- omit in toc -->
 
 - [Overview](#overview)
 - [Original Problem](#original-problem)
@@ -12,30 +12,45 @@
 
 ## Overview
 
-Hard Link Manager allows you to connect to a remote SMB server, view files/folders details including inode numbers and hard link counts, and then find possible duplicate files and replace one with a link to the other.
+SMB Manager allows you to connect to a remote SMB server, view
+files/folders details including inode numbers and hard link counts, and then
+find possible duplicate files and replace one with a link to the other.
 
-It does this as QUICKLY as possible, and as such it shows potential matches WITHOUT doing a comparison of the file contents. It relies on the human operator to know what is actually a match. AS SUCH THIS APP IS VERY DANGEROUS.
+It does this as QUICKLY as possible, and as such it shows potential matches
+WITHOUT doing a comparison of the file contents. It relies on the human
+operator to know what is actually a match. AS SUCH THIS APP IS VERY DANGEROUS.
 
-I do want to add byte-by-byte comparisons at some point, but for my initial use case, I didn't need it.
+I do want to add byte-by-byte comparisons at some point, but for my initial
+use case, I didn't need it.
 
-Here's what v0.3.1 looks like in action, with the interface for searching and viewing results on the left, and detailed directory listings on the right:
+Here's what v0.3.1 looks like in action, with the interface for searching and
+viewing results on the left, and detailed directory listings on the right:
 
 ![a screenshot of the app running on Windows](./docs/screenshot-v0.3.1.png)
 
 ## Original Problem
 
-I've got an SMB share with large files that never change, but there are some copies of the same file in different folders with different names, and because the files are large, this wastes a lot of disk space. So I wanted to find these duplicate files, and use [hard links](https://en.wikipedia.org/wiki/Hard_link) to force them both to share the same bytes on disk.
+I've got an SMB share with large files that never change, but there are some
+copies of the same file in different folders with different names, and because
+the files are large, this wastes a lot of disk space. So I wanted to find these
+duplicate files, and use [hard links](https://en.wikipedia.org/wiki/Hard_link)
+to force them both to share the same bytes on disk.
 
-There are command line solutions that will do this (e.g. [jdupes](https://codeberg.org/jbruchon/jdupes)), but I wanted a different experience, including:
+There are command line solutions that will do this (e.g.
+[jdupes](https://codeberg.org/jbruchon/jdupes)), but I wanted a different
+experience, including:
 
-1. do all work remotely via an existing SMB user, with that user's credentials and permissions.
-2. avoid reading every byte of every file I wanted to compare, and instead quickly locate potential matches, then choose the actual matches by hand.
+1. do all work remotely via an existing SMB user, with that user's credentials
+   and permissions.
+2. avoid reading every byte of every file I wanted to compare, and instead
+   quickly locate potential matches, then choose the actual matches by hand.
 3. browse files/folders in a GUI, seeing inode and hard link info.
 
 ## Constraints
 
 - GUI application
-- App starts quickly, stays responsive during work (lightweight, batches slow work in threads)
+- App starts quickly, stays responsive during work (lightweight, batches slow
+  work in threads)
 - Low resource usage
 - Cross platform (Windows & Linux required; macOS is nice-to-have)
 - Looks and feels like a native app on each platform.
@@ -47,14 +62,15 @@ There are command line solutions that will do this (e.g. [jdupes](https://codebe
 
 ## Build
 
-The included [`Makefile`](./Makefile) handles most common operations in a cross-platform way.
+The included [`Makefile`](./Makefile) handles most common operations in a
+cross-platform way.
 
 ```text
 $ make help
 Targets:
   configure  - regenerate CMake's build files (run after editing CMakeLists.txt)
-  release    - build hardlinkmgr (Release, app only)
-  debug      - build hardlinkmgr (Debug, app only)
+  release    - build smbmgr (Release, app only)
+  debug      - build smbmgr (Debug, app only)
   test-unit  - build + run the serverless unit suite
   test-all   - build + run every suite (needs Docker)
   clean      - remove the build/ directory
@@ -77,7 +93,7 @@ Targets:
 - To use the Makefile, I installed `make` via [scoop](https://scoop.sh/).
 - To run the integration tests, you'll need [Docker](https://docs.docker.com/desktop/setup/install/windows-install/) installed and running.
 
-Builds end up in `build\windows\bin\{Release|Debug}\hardlinkmgr.exe`. Required Qt .dlls are copied into the same folder.
+Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into the same folder.
 
 ### Linux
 
@@ -97,19 +113,12 @@ Additionally, you'll need **Docker** with Compose v2 to run all the tests.
 
 ## Tests
 
-The `tst_*` suites are excluded from the default `ALL` target (so an everyday `cmake --build` only builds the app), so build them explicitly before running `ctest`. Two build targets: `hlm_tests_unit` (just the serverless "unit"-labeled suites, matching `ctest ... -unit`) and `hlm_tests` (everything, matching `ctest ... -all`) — build the smaller one if that's all you're about to run, it skips compiling the docker-fixture suites:
+| command          | notes                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `make test-unit` | Builds and runs the unit tests. These don't need a server.                                              |
+| `make test-all`  | Builds and runs every test, including the integration and widget tests that need a Samba test server. |
 
-```powershell
-cmake --build --preset windows-debug --target tests/hlm_tests_unit --parallel
-ctest --preset windows-unit    # serverless unit tests (< 1 s)
-
-cmake --build --preset windows-debug --target tests/hlm_tests --parallel
-ctest --preset windows-all     # everything, incl. integration/widget suites
-```
-
-(On Linux, drop the `tests/` prefix — e.g. `cmake --build --preset linux-debug --target hlm_tests --parallel`, then `linux-unit` / `linux-all`. Windows needs that prefix because CMake's Visual Studio generator can't resolve a bare target name for a target defined in a subdirectory; Linux's Ninja generator doesn't need it.)
-
-The full run needs **Docker** with Compose v2: ctest builds and starts a Samba container (port 10445, share on a named volume), runs the SMB-backed suites against it, and tears it down. Without Docker on PATH those suites aren't registered and the unit tier still runs. See [`docs/testing.md`](./docs/testing.md) and [ADR 4](./docs/decisions/0004-automated-test-architecture.md).
+Running anything beyond the unit tests requires **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
 
 ## Releasing
 

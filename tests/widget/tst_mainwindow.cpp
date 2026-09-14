@@ -14,9 +14,7 @@
 
 // The main-window connect flow and toolbar logic, driven through the real
 // widgets with a stubbed password prompt (the modal QInputDialog never runs
-// under test). Covers testing.md M1 "Connect"/"Disconnect"/"Cancelled
-// password prompt"/"Bad URL", M5 "Cross-view selection"/"Remembered URL",
-// and the M7 panel layout.
+// under test).
 class TestMainWindow : public QObject
 {
     Q_OBJECT
@@ -41,7 +39,7 @@ private:
 void TestMainWindow::initTestCase()
 {
     SmbSession session;
-    HLM_CONNECT_OR_SKIP(m_fx, session);
+    SMBMGR_CONNECT_OR_SKIP(m_fx, session);
 }
 
 void TestMainWindow::init()
@@ -114,7 +112,7 @@ void TestMainWindow::connectFlowBuildsTwoViewsAndPanel()
     MainWindow window;
     connectWindow(window);
 
-    // Exactly two views (ADR 0003) left of the Match Finder panel.
+    // Exactly two views (ADR 0003) right of the Match Finder panel.
     QCOMPARE(window.findChildren<FileBrowserView *>().size(), 2);
     QCOMPARE(window.findChildren<MatchFinderPanel *>().size(), 1);
     QVERIFY(qobject_cast<QSplitter *>(window.centralWidget()));
@@ -152,6 +150,6 @@ void TestMainWindow::rememberedUrl()
     QCOMPARE(relaunched.findChild<QLineEdit *>("mw.urlEdit")->text(), m_fx.url());
 }
 
-HLM_TEST_MAIN(TestMainWindow)
+SMBMGR_TEST_MAIN(TestMainWindow)
 
 #include "tst_mainwindow.moc"

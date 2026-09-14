@@ -12,12 +12,10 @@ permissions:
   contents: write # only needed for the release job's upload
 
 jobs:
-  # Catches a tag pushed without first bumping CMakeLists.txt's VERSION (or
-  # vice versa) before the expensive windows/linux jobs spend runner minutes
-  # on it. The job itself has no `if:` — only its one step does — so that a
-  # skipped step (workflow_dispatch, no tag involved) still leaves the job
-  # "successful" and doesn't cascade into skipping windows/linux, which also
-  # run outside of a tag push (see the workflow_dispatch note above).
+  # Fails fast on a tag that doesn't match CMakeLists.txt's VERSION, before
+  # the windows/linux jobs spend runner minutes. The `if:` is on the step, not
+  # the job: a skipped job would also skip windows/linux, which must still run
+  # under workflow_dispatch.
   check-version:
     runs-on: ubuntu-latest
     steps:
@@ -50,10 +48,9 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           # 6.11.1 (the local dev kit CMakePresets.json's "windows" preset points
-          # at) isn't installable via aqtinstall yet, so CI is pinned one minor
-          # line behind at the newest version aqt actually has for this arch.
-          # Keep this in sync with the path used to override CMAKE_PREFIX_PATH
-          # in the Configure step below.
+          # at) isn't installable via aqtinstall yet, so CI pins an older version
+          # that aqt has for this arch. Keep this in sync with the path used to
+          # override CMAKE_PREFIX_PATH in the Configure step below.
           version: '6.8.3'
           arch: 'win64_msvc2022_64'
           # Qt SVG ships as an archive inside the base kit for this arch (confirmed
@@ -70,16 +67,9 @@ jobs:
         run: cmake --preset windows -DCMAKE_PREFIX_PATH="${{ github.workspace }}/qt/6.8.3/msvc2022_64"
 
       - name: Build tests
-        # "tests/hlm_tests_unit" (not bare "hlm_tests_unit"): CMake's VS-generator
-        # --target build needs the subdirectory-qualified name to locate a target
-        # that lives outside the top-level build dir, or msbuild fails looking
-        # for the .vcxproj in the wrong folder. hlm_tests_unit (not hlm_tests):
-        # this job only ever runs the "unit" label below, and GitHub's windows
-        # runners can't run the docker-fixture suites anyway (see next step) —
-        # no point building them. --parallel is safe here: the suites' Qt
-        # runtime deploy is one shared windeployqt run (tests/CMakeLists.txt),
-        # not one per exe, so there's no file-copy race across targets.
-        run: cmake --build --preset windows-debug --target tests/hlm_tests_unit --parallel
+        # The Visual Studio generator needs the subdirectory-qualified target
+        # name. Unit suites only: this runner can't run the docker ones.
+        run: cmake --build --preset windows-debug --target tests/smbmgr_tests_unit --parallel
 
       - name: Run tests
         # windows-all needs Docker, and GitHub's windows runners can't run the
@@ -89,21 +79,21 @@ jobs:
         run: ctest --preset windows-unit
 
       - name: Build release
-        # --target hardlinkmgr: only the app is part of the shipped artifact;
+        # --target smbmgr: only the app is part of the shipped artifact;
         # the tst_* suites above were already excluded from ALL and only get
         # built on request (see EXCLUDE_FROM_ALL in the top-level CMakeLists.txt).
-        run: cmake --build --preset windows-release --target hardlinkmgr --parallel
+        run: cmake --build --preset windows-release --target smbmgr --parallel
 
       - name: Package
         shell: pwsh
         run: |
-          Copy-Item -Recurse "build/windows/bin/Release" "hardlinkmgr-windows-x64"
-          Compress-Archive -Path "hardlinkmgr-windows-x64" -DestinationPath "hardlinkmgr-windows-x64.zip"
+          Copy-Item -Recurse "build/windows/bin/Release" "smbmgr-windows-x64"
+          Compress-Archive -Path "smbmgr-windows-x64" -DestinationPath "smbmgr-windows-x64.zip"
 
       - uses: actions/upload-artifact@v7
         with:
           name: windows-release
-          path: hardlinkmgr-windows-x64.zip
+          path: smbmgr-windows-x64.zip
 
   linux:
     needs: check-version
@@ -123,9 +113,9 @@ jobs:
         run: cmake --preset linux-debug
 
       - name: Build tests
-        # hlm_tests (not hlm_tests_unit): linux-all below runs the full suite
+        # smbmgr_tests (not smbmgr_tests_unit): linux-all below runs the full suite
         # including the docker-fixture suites, so all of them need building.
-        run: cmake --build --preset linux-debug --target hlm_tests --parallel
+        run: cmake --build --preset linux-debug --target smbmgr_tests --parallel
 
       - name: Run tests
         # linux-all: the ubuntu runner has Docker + Compose v2 preinstalled, so
@@ -137,9 +127,9 @@ jobs:
         run: cmake --preset linux-release
 
       - name: Build release
-        # --target hardlinkmgr: see the equivalent comment in the windows job —
+        # --target smbmgr: see the equivalent comment in the windows job —
         # only the app ships, tests are excluded from ALL and built on request.
-        run: cmake --build --preset linux-release --target hardlinkmgr --parallel
+        run: cmake --build --preset linux-release --target smbmgr --parallel
 
       - name: Package .deb
         run: |

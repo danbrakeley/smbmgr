@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Hard Link Manager
+Name=SMB Manager
 GenericName=SMB Hard-Link Deduplicator
 Comment=Manually deduplicate files on an SMB share by replacing near-duplicates with hard links
-Exec=hardlinkmgr
-Icon=hardlinkmgr
+Exec=smbmgr
+Icon=smbmgr
 Terminal=false
 Categories=Utility;FileTools;

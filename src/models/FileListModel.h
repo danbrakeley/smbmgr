@@ -31,8 +31,8 @@ public:
     };
 
     // How the icon column's Qt::DecorationRole is computed. Os asks the host
-    // OS for a per-extension icon (see IconUtil::osIcon); Generic keeps the
-    // original QStyle folder/file icons.
+    // OS for a per-extension icon (see IconUtil::osIcon); Generic uses QStyle's
+    // standard folder/file icons.
     enum class IconMode {
         Os,
         Generic,
@@ -43,7 +43,7 @@ public:
     void setEntries(const QList<FileEntry> &entries);
     const FileEntry &entryAt(int row) const { return m_entries.at(row); }
 
-    // Milestone 3's lazy stat results land here, one row at a time.
+    // Lazy stat results land here, one row at a time.
     void setNlink(int row, int nlink);
 
     void setIconMode(IconMode mode);

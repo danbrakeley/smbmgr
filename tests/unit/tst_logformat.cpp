@@ -8,8 +8,8 @@
 
 #include "common/TestMain.h"
 
-// The jsonl line format from docs/roadmap.md "Keep log/history of
-// actions/errors": level/time/msg required, structured extra fields allowed.
+// The audit log's jsonl line format: level/time/msg required, structured extra
+// fields allowed.
 class TestLogFormat : public QObject
 {
     Q_OBJECT
@@ -24,7 +24,7 @@ private slots:
     void awkwardStringsStayOnOneLine();
 
 private:
-    // 2026-07-29T17:22:18.808Z, the roadmap's example timestamp.
+    // 2026-07-29T17:22:18.808Z; nonzero milliseconds exercise the fraction.
     const QDateTime m_time{QDate(2026, 7, 29), QTime(17, 22, 18, 808),
                            QTimeZone::UTC};
 };
@@ -103,6 +103,6 @@ void TestLogFormat::awkwardStringsStayOnOneLine()
     QCOMPARE(roundTrip.value("detail").toString(), awkward);
 }
 
-HLM_TEST_MAIN(TestLogFormat)
+SMBMGR_TEST_MAIN(TestLogFormat)
 
 #include "tst_logformat.moc"
