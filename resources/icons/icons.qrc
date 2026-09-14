@@ -5,6 +5,6 @@
     <file alias="desktop_access_disabled.svg">material/desktop_access_disabled_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg</file>
     <file alias="desktop_windows.svg">material/desktop_windows_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg</file>
     <file alias="list_arrow.svg">material/list_arrow_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg</file>
-    <file alias="app/app256.png">app/app256.png</file>
+    <file alias="app/app.svg">app/app.svg</file>
   </qresource>
 </RCC>
