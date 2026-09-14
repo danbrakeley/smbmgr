@@ -27,9 +27,10 @@ endif()
 include(FetchContent)
 
 # Configure libsmb2 before it is added. Use CACHE ... FORCE rather than plain
-# set(): libsmb2's CMakeLists calls cmake_minimum_required(VERSION 3.5), which
-# resets CMP0077 to OLD inside its scope, so its option() would otherwise ignore
-# a normal variable and default BUILD_SHARED_LIBS back to ON.
+# set(): libsmb2's CMakeLists calls cmake_minimum_required(VERSION 3.5) (raised
+# to 3.10 by CMAKE_POLICY_VERSION_MINIMUM below), which still leaves CMP0077
+# (3.13) OLD inside its scope, so its option() would otherwise ignore a normal
+# variable and default BUILD_SHARED_LIBS back to ON.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build libsmb2 statically" FORCE) # static: nothing to stage at runtime
 set(ENABLE_EXAMPLES   OFF CACHE BOOL "" FORCE)   # we don't need its sample programs
 set(ENABLE_LIBKRB5    OFF CACHE BOOL "" FORCE)   # app authenticates via NTLMSSP; no Kerberos
@@ -41,7 +42,12 @@ FetchContent_Declare(
   GIT_TAG        6723c56fd6f5a597fc04cc091401349f50c00afc
   GIT_SHALLOW    FALSE   # required: a shallow clone can't check out an arbitrary SHA
 )
+# libsmb2 (still, as of upstream HEAD) declares cmake_minimum_required(VERSION
+# 3.5), and CMake 4.x warns about anything below 3.10. Treat it as 3.10 for
+# libsmb2 only to silence that. Ignored by CMake < 4.0.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 FetchContent_MakeAvailable(libsmb2)
+unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 # ---------------------------------------------------------------------------
 # Qt — found from the installed kit. CMAKE_PREFIX_PATH is supplied by the

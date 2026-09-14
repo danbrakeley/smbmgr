@@ -2,7 +2,8 @@
 
 - [Overview](#overview)
 - [Original Problem](#original-problem)
-- [Constraints](#constraints)
+- [Dangers and Alternatives](#dangers-and-alternatives)
+- [Design Constraints](#design-constraints)
 - [Development Notes](#development-notes)
 - [Build](#build)
   - [Windows](#windows)
@@ -12,47 +13,51 @@
 
 ## Overview
 
-SMB Manager allows you to connect to a remote SMB server, view
-files/folders details including inode numbers and hard link counts, and then
-find possible duplicate files and replace one with a link to the other.
+SMB Manager allows you to manage the files on a remote SMB server.
 
-It does this as QUICKLY as possible, and as such it shows potential matches
-WITHOUT doing a comparison of the file contents. It relies on the human
-operator to know what is actually a match. AS SUCH THIS APP IS VERY DANGEROUS.
+Features include:
 
-I do want to add byte-by-byte comparisons at some point, but for my initial
-use case, I didn't need it.
+- view remote inode information
+- manage hard links
+- search for possible duplicate files
+- search for all groups of files that share hard links
 
-Here's what v0.3.1 looks like in action, with the interface for searching and
-viewing results on the left, and detailed directory listings on the right:
-
-![a screenshot of the app running on Windows](./docs/screenshot-v0.3.1.png)
+This project was previously called Hard Link Manager (hardlinkmgr), but has
+been renamed.
 
 ## Original Problem
 
-I've got an SMB share with large files that never change, but there are some
-copies of the same file in different folders with different names, and because
-the files are large, this wastes a lot of disk space. So I wanted to find these
-duplicate files, and use [hard links](https://en.wikipedia.org/wiki/Hard_link)
-to force them both to share the same bytes on disk.
+Create an interactive GUI tool for remotely managing space on my NAS. I want
+this tool to help me identify where space is being used, allow me to do basic
+file management on files/folders, and to view and manage hard links.
 
-There are command line solutions that will do this (e.g.
-[jdupes](https://codeberg.org/jbruchon/jdupes)), but I wanted a different
-experience, including:
+## Dangers and Alternatives
 
-1. do all work remotely via an existing SMB user, with that user's credentials
-   and permissions.
-2. avoid reading every byte of every file I wanted to compare, and instead
-   quickly locate potential matches, then choose the actual matches by hand.
-3. browse files/folders in a GUI, seeing inode and hard link info.
+If you aren't aware of hard links and inodes, make sure you understand what
+they are and the dangers of using hard links before you use this app:
 
-## Constraints
+- [hard link (Wikipedia)](https://en.wikipedia.org/wiki/Hard_link)
+- [inode (Wikipedia)](https://en.wikipedia.org/wiki/Inode)
+
+If your use case involves duplicate files that you want to edit independently,
+then hard links are not for you. I'd check out filesystems with
+[COW](https://en.wikipedia.org/wiki/Copy-on-write) support. For example,
+I know a Synology NAS that uses BTRFS can enable [Fast file clone](https://kb.synology.com/en-my/DSM/help/DSM/AdminCenter/file_service_advanced_introduction?version=7)
+to get COW support on copies made through SMB. Something like that may be a
+better solution for your use case.
+
+Also, if you don't care about working via SMB, and you just want to find
+duplicate files and replace them with hard links, then tools such as
+[jdupes](https://codeberg.org/jbruchon/jdupes)) exist and are probably a
+better match for what you want.
+
+## Design Constraints
 
 - GUI application
-- App starts quickly, stays responsive during work (lightweight, batches slow
-  work in threads)
+- App starts quickly (no leading screen/loading bar)
+- App stays responsive during work (smart use of threads)
 - Low resource usage
-- Cross platform (Windows & Linux required; macOS is nice-to-have)
+- Cross platform (Windows & Linux required; macOS is a future goal)
 - Looks and feels like a native app on each platform.
 
 ## Development Notes
