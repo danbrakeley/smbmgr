@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(smbmgr
-        VERSION 0.4.0
-        DESCRIPTION "GUI tool for manual SMB hard-link deduplication"
+        VERSION 0.4.1
+        DESCRIPTION "File manager for remote SMB shares"
         LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
