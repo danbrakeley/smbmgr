@@ -96,11 +96,11 @@ Targets:
 
 ### Windows
 
-- I developed this using [MSBuild 18.8 (Visual Studio 2026)](https://visualstudio.microsoft.com/)
+- Developed using [MSBuild 18.8 (Visual Studio 2026)](https://visualstudio.microsoft.com/)
 - Qt's MSVC binaries can be installed by selecting "Custom Installation" in the [online installer](https://doc.qt.io/qt-6/qt-online-installation.html).
-- To use git and bash scripts, I use [Git for Windows](https://git-scm.com/install/windows)
-- To use the Makefile, I installed `make` via [scoop](https://scoop.sh/).
-- To run the integration tests, you'll need [Docker](https://docs.docker.com/desktop/setup/install/windows-install/) installed and running.
+- For git and bash, use [Git for Windows](https://git-scm.com/install/windows)
+- To use the Makefile, install `make` (e.g. via [scoop](https://scoop.sh/)).
+- To run the full test suite, install [Docker](https://docs.docker.com/desktop/setup/install/windows-install/).
 
 Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into the same folder.
 
