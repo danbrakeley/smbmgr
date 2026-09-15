@@ -3,6 +3,7 @@
 #include <QDialogButtonBox>
 #include <QFont>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -23,7 +24,7 @@ AboutDialog::AboutDialog(QWidget *parent)
     setWindowTitle(tr("About SMB Manager"));
 
     auto *iconLabel = new QLabel(this);
-    iconLabel->setPixmap(QPixmap(QStringLiteral(":/icons/app/app256.png")));
+    iconLabel->setPixmap(QIcon(QStringLiteral(":/icons/app/app.svg")).pixmap(QSize(256, 256)));
 
     auto *nameLabel = new QLabel(tr("SMB Manager"), this);
     QFont nameFont = nameLabel->font();

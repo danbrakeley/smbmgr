@@ -23,8 +23,11 @@ jobs:
 
       - name: Verify CMakeLists.txt VERSION matches the pushed tag
         if: startsWith(github.ref, 'refs/tags/v')
+        # The regex only looks inside project(...), which can span lines (-z
+        # reads the whole file as one record), so other VERSION arguments such
+        # as cmake_minimum_required's can't match.
         run: |
-          cmake_version=$(grep -oP '(?<=VERSION )[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | head -1)
+          cmake_version=$(grep -Pzo '(?ms)^\s*project\s*\([^)]*?\bVERSION\s+\K[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | tr '\0' '\n' | head -1)
           tag_version="${GITHUB_REF_NAME#v}"
           if [ "$cmake_version" != "$tag_version" ]; then
             echo "::error::CMakeLists.txt VERSION ($cmake_version) does not match tag $GITHUB_REF_NAME (expected $tag_version)"
@@ -68,15 +71,16 @@ jobs:
 
       - name: Build tests
         # The Visual Studio generator needs the subdirectory-qualified target
-        # name. Unit suites only: this runner can't run the docker ones.
-        run: cmake --build --preset windows-debug --target tests/smbmgr_tests_unit --parallel
+        # name. Unit + integration suites only: this runner can't run the
+        # docker ones.
+        run: cmake --build --preset windows-debug --target tests/smbmgr_tests_integration --parallel
 
       - name: Run tests
         # windows-all needs Docker, and GitHub's windows runners can't run the
         # Linux containers the Samba fixture needs — docker-labeled suites run
-        # on the linux job instead. This still runs every Windows-buildable
-        # serverless suite.
-        run: ctest --preset windows-unit
+        # on the linux job instead. windows-integration still runs every
+        # serverless suite (unit + integration labels).
+        run: ctest --preset windows-integration
 
       - name: Build release
         # --target smbmgr: only the app is part of the shipped artifact;

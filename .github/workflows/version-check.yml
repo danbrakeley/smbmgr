@@ -18,9 +18,15 @@ jobs:
           fetch-depth: 0
 
       - name: Verify CMakeLists.txt VERSION was bumped from main
+        # project_version reads VERSION from inside project(...) only, which
+        # can span lines (-z reads the whole input as one record), so other
+        # VERSION arguments such as cmake_minimum_required's can't match.
         run: |
-          pr_version=$(grep -oP '(?<=VERSION )[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | head -1)
-          base_version=$(git show "${{ github.event.pull_request.base.sha }}:CMakeLists.txt" | grep -oP '(?<=VERSION )[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          project_version() {
+            grep -Pzo '(?ms)^\s*project\s*\([^)]*?\bVERSION\s+\K[0-9]+\.[0-9]+\.[0-9]+' | tr '\0' '\n' | head -1
+          }
+          pr_version=$(project_version < CMakeLists.txt)
+          base_version=$(git show "${{ github.event.pull_request.base.sha }}:CMakeLists.txt" | project_version)
 
           echo "main VERSION: $base_version"
           echo "PR VERSION:   $pr_version"

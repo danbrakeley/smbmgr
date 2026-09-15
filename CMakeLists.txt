@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 3.21)
+# 4.2: required for the "windows" preset's Visual Studio 18 (2026) generator
+# Keep in sync with cmakeMinimumRequired in CMakePresets.json.
+cmake_minimum_required(VERSION 4.2)
 
 project(smbmgr
-        VERSION 0.4.0
-        DESCRIPTION "GUI tool for manual SMB hard-link deduplication"
+        VERSION 0.4.1
+        DESCRIPTION "File manager for remote SMB shares"
         LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -27,9 +29,10 @@ endif()
 include(FetchContent)
 
 # Configure libsmb2 before it is added. Use CACHE ... FORCE rather than plain
-# set(): libsmb2's CMakeLists calls cmake_minimum_required(VERSION 3.5), which
-# resets CMP0077 to OLD inside its scope, so its option() would otherwise ignore
-# a normal variable and default BUILD_SHARED_LIBS back to ON.
+# set(): libsmb2's CMakeLists calls cmake_minimum_required(VERSION 3.5) (raised
+# to 3.10 by CMAKE_POLICY_VERSION_MINIMUM below), which still leaves CMP0077
+# (3.13) OLD inside its scope, so its option() would otherwise ignore a normal
+# variable and default BUILD_SHARED_LIBS back to ON.
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build libsmb2 statically" FORCE) # static: nothing to stage at runtime
 set(ENABLE_EXAMPLES   OFF CACHE BOOL "" FORCE)   # we don't need its sample programs
 set(ENABLE_LIBKRB5    OFF CACHE BOOL "" FORCE)   # app authenticates via NTLMSSP; no Kerberos
@@ -41,14 +44,20 @@ FetchContent_Declare(
   GIT_TAG        6723c56fd6f5a597fc04cc091401349f50c00afc
   GIT_SHALLOW    FALSE   # required: a shallow clone can't check out an arbitrary SHA
 )
+# libsmb2 (still, as of upstream HEAD) declares cmake_minimum_required(VERSION
+# 3.5), and CMake 4.x warns about anything below 3.10. Treat it as 3.10 for
+# libsmb2 only to silence that.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 FetchContent_MakeAvailable(libsmb2)
+unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 # ---------------------------------------------------------------------------
 # Qt — found from the installed kit. CMAKE_PREFIX_PATH is supplied by the
 # active CMake preset (see CMakePresets.json).
 # ---------------------------------------------------------------------------
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Svg)
-qt_standard_project_setup()
+# 6.8 is the oldest kit CI builds with (release.yml's windows job).
+find_package(Qt6 6.8 REQUIRED COMPONENTS Widgets Network Svg)
+qt_standard_project_setup(REQUIRES 6.8)
 
 # All app code lives in a static library so the test executables under tests/
 # link the exact same objects; the app target is just main.cpp.
@@ -85,7 +94,6 @@ qt_add_library(smbmgr_core STATIC
   src/ui/MainWindow.h
   src/ui/MatchFinderPanel.cpp
   src/ui/MatchFinderPanel.h
-  resources/icons/icons.qrc
 )
 
 target_include_directories(smbmgr_core PUBLIC src)
@@ -108,18 +116,38 @@ add_custom_target(smbmgr_build_info ALL
 target_include_directories(smbmgr_core PRIVATE ${SMBMGR_BUILD_INFO_DIR})
 add_dependencies(smbmgr_core smbmgr_build_info)
 
-# AUTORCC: qt_standard_project_setup() doesn't enable it, and without it
-# resources/icons/icons.qrc would be an inert source file instead of going
-# through rcc. Because the qrc sits in a static library, the linker may drop
-# its self-registration object, so every executable calls
-# Q_INIT_RESOURCE(icons) to force it in (src/main.cpp, tests/common/TestMain.h).
-set_target_properties(smbmgr_core PROPERTIES AUTORCC ON)
+# Toolbar/action icons, served at :/icons/<alias>. On a static library,
+# qt_add_resources puts the resource initializer in an object library that is
+# linked into every consuming executable, so no Q_INIT_RESOURCE is needed.
+set(smbmgr_icon_aliases
+  carbon_design_line/folder-parent-svgrepo-com.svg                              folder_parent.svg
+  carbon_design_line/content-view-svgrepo-com.svg                               content_view.svg
+  material/desktop_access_disabled_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg   desktop_access_disabled.svg
+  material/desktop_windows_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg           desktop_windows.svg
+  material/list_arrow_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg                list_arrow.svg
+  app/app.svg                                                                   app/app.svg
+)
+set(smbmgr_icon_files)
+while(smbmgr_icon_aliases)
+  list(POP_FRONT smbmgr_icon_aliases icon_file icon_alias)
+  set_source_files_properties(resources/icons/${icon_file} PROPERTIES
+    QT_RESOURCE_ALIAS ${icon_alias})
+  list(APPEND smbmgr_icon_files resources/icons/${icon_file})
+endwhile()
+qt_add_resources(smbmgr_core "icons"
+  PREFIX "/icons"
+  FILES ${smbmgr_icon_files}
+)
 
-target_link_libraries(smbmgr_core PUBLIC
-  Qt6::Widgets
-  Qt6::Network   # QHostInfo: async DNS ahead of libsmb2's blocking resolver
-  Qt6::Svg       # renders the toolbar/action icons in resources/icons
-  smb2
+# Only Widgets appears in public headers. The rest are used from .cpp files
+# only; being a static library, they still reach the final executable link.
+target_link_libraries(smbmgr_core
+  PUBLIC
+    Qt6::Widgets
+  PRIVATE
+    Qt6::Network   # QHostInfo: async DNS ahead of libsmb2's blocking resolver
+    Qt6::Svg       # renders the toolbar/action icons in resources/icons
+    smb2
 )
 
 # libsmb2's public headers include <winsock2.h>/<windows.h>; without
@@ -163,8 +191,9 @@ if(WIN32)
 endif()
 
 # ---------------------------------------------------------------------------
-# Tests (ctest). BUILD_TESTING is ON by default via include(CTest); the suites
-# labeled "docker" additionally need the Samba fixture (see tests/docker/).
+# Tests (ctest). BUILD_TESTING is ON by default via include(CTest). Suites are
+# labeled by folder ("unit", "integration", "widget"), plus "docker" if they
+# need the Samba fixture (see tests/docker/).
 # EXCLUDE_FROM_ALL keeps the tst_* executables off the default ALL target, so
 # an ordinary `cmake --build` (app dev loop, release packaging) only builds
 # smbmgr — build the "smbmgr_tests" target first to run the suite.
@@ -188,22 +217,28 @@ if(UNIX AND NOT APPLE)
     set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "Install prefix" FORCE)
   endif()
 
-  install(TARGETS smbmgr RUNTIME DESTINATION bin)
+  # Everything the package ships is in the "smbmgr" component. libsmb2's own
+  # install rules (static lib, headers, pkg-config/CMake files) come along via
+  # FetchContent and land in the "Unspecified" component, which CPack skips
+  # (see CPACK_INSTALL_CMAKE_PROJECTS below).
+  install(TARGETS smbmgr RUNTIME DESTINATION bin COMPONENT smbmgr)
 
   # Desktop entry + hicolor icon set (generated by scripts/gen-app-icons.sh)
   # so smbmgr shows up with its icon in application launchers/menus.
   # hicolor-icon-theme isn't declared as a dependency: it's effectively
   # universal on desktop Linux, and CPACK_DEBIAN_PACKAGE_SHLIBDEPS below only
   # covers shared-library deps.
-  install(FILES resources/linux/smbmgr.desktop DESTINATION share/applications)
-  install(DIRECTORY resources/icons/app/hicolor/ DESTINATION share/icons/hicolor)
+  install(FILES resources/linux/smbmgr.desktop DESTINATION share/applications COMPONENT smbmgr)
+  install(DIRECTORY resources/icons/app/hicolor/ DESTINATION share/icons/hicolor COMPONENT smbmgr)
 
   # AppStream MetaInfo: App Center's local-.deb install card (name + icon
   # above the Install button) is built from this, not from the .desktop file
   # or icon theme directly — without it, App Center shows a generic package
   # icon even though the launcher/menu icon above is already correct.
-  install(FILES resources/linux/smbmgr.metainfo.xml DESTINATION share/metainfo)
+  install(FILES resources/linux/smbmgr.metainfo.xml DESTINATION share/metainfo COMPONENT smbmgr)
 
+  # Build dir; project name; component; directory within the package.
+  set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR};${PROJECT_NAME};smbmgr;/")
   set(CPACK_GENERATOR "DEB")
   set(CPACK_PACKAGE_CONTACT "Dan Brakeley <deb@aliencamel.com>")
   set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)

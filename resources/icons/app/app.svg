@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   version="1.1"
+   id="Layer_1"
+   viewBox="0 0 504 504"
+   xml:space="preserve"
+   sodipodi:docname="app.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs7" /><sodipodi:namedview
+   id="namedview7"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   inkscape:zoom="0.89087302"
+   inkscape:cx="185.21158"
+   inkscape:cy="277.25612"
+   inkscape:window-width="3840"
+   inkscape:window-height="2054"
+   inkscape:window-x="-11"
+   inkscape:window-y="1789"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="Layer_1" />
+<circle
+   style="fill:#8d99ae;fill-opacity:1"
+   cx="252"
+   cy="252"
+   r="252"
+   id="circle1" />
+<g
+   id="g2">
+	<rect
+   x="94.5"
+   y="373"
+   style="fill:#2b2d42;fill-opacity:1"
+   width="315"
+   height="15"
+   id="rect1"
+   rx="6" />
+	<rect
+   x="244.5"
+   y="308"
+   style="fill:#2b2d42;fill-opacity:1"
+   width="15"
+   height="71.9"
+   id="rect2" />
+</g>
+<rect
+   x="215.2"
+   y="360.39999"
+   style="fill:#2b2d42;fill-opacity:1"
+   width="74"
+   height="40"
+   id="rect3"
+   rx="6" />
+<path
+   style="fill:#edf2f4;fill-opacity:1"
+   d="M221.2,110.6L221.2,110.6c0-8.9-7.2-16.1-16.1-16.1h-79.3c-8.9,0-16.1,7.2-16.1,16.1v188.8  c0,8.9,7.2,16.1,16.1,16.1h252.5c8.9,0,16.1-7.2,16.1-16.1V142.9c0-8.9-7.2-16.1-16.1-16.1h-141  C228.4,126.8,221.2,119.6,221.2,110.6z"
+   id="path3" />
+<rect
+   x="130.9"
+   y="131.6"
+   style="fill:#d90429;fill-opacity:1"
+   width="44.3"
+   height="166.3"
+   id="rect4" />
+<rect
+   x="196.9"
+   y="178.8"
+   style="fill:#ef233c;fill-opacity:1"
+   width="44.3"
+   height="119"
+   id="rect5" />
+<rect
+   x="262.8"
+   y="220.5"
+   style="fill:#8d99ae;fill-opacity:1"
+   width="44.3"
+   height="77.3"
+   id="rect6" />
+<rect
+   x="328.8"
+   y="249"
+   style="fill:#2b2d4c;fill-opacity:1"
+   width="44.3"
+   height="48.8"
+   id="rect7" />
+</svg>

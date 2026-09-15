@@ -1,21 +1,29 @@
 # Test suites. One executable per suite: Qt Test runs one QObject test class
 # per qExec(), and separate exes give crash isolation and ctest-level
-# parallelism. Labels partition the suites:
-#   unit   — serverless; run with `ctest -L unit` (or `-LE docker`)
-#   docker — needs the Samba fixture (tests/docker/); registered only when
-#            docker is on PATH
+# parallelism. Every suite carries the label of its folder:
+#   unit        — pure logic; no server, no network
+#   integration — talks to the OS / network (e.g. DNS) or an SMB server
+#   widget      — drives the UI against an SMB server
+# plus "docker" if it needs the Samba fixture (tests/docker/). Docker suites
+# are registered only when docker is on PATH.
 # Every suite uses SMBMGR_TEST_MAIN from common/TestMain.h instead of QTEST_MAIN.
 
-find_package(Qt6 REQUIRED COMPONENTS Test)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
 
 # Umbrella targets so `cmake --build --preset <preset> --target smbmgr_tests`
 # builds every suite in one shot without pulling them into the default ALL
 # target (see EXCLUDE_FROM_ALL on add_subdirectory(tests) in the top-level
-# CMakeLists.txt). smbmgr_tests_unit is the "unit"-labeled subset, for CI legs
-# (like Windows) that only ever run `ctest -L unit` and would otherwise waste
-# time building the docker-fixture suites they can never execute.
+# CMakeLists.txt). The others build just the subset their matching test preset
+# runs, so e.g. a runner without Docker doesn't waste time building
+# docker-fixture suites it can never execute:
+#   smbmgr_tests_unit        — "unit" (the *-unit presets)
+#   smbmgr_tests_integration — "unit" + "integration", never "docker"
+#                              (the *-integration presets)
+#   smbmgr_tests_docker      — "docker" (the *-docker presets)
 add_custom_target(smbmgr_tests)
 add_custom_target(smbmgr_tests_unit)
+add_custom_target(smbmgr_tests_integration)
+add_custom_target(smbmgr_tests_docker)
 
 function(smbmgr_add_test name)
   cmake_parse_arguments(ARG "" "" "SOURCES;LABELS;FIXTURES" ${ARGN})
@@ -23,8 +31,15 @@ function(smbmgr_add_test name)
   target_link_libraries(${name} PRIVATE smbmgr_core Qt6::Test)
   target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
   add_dependencies(smbmgr_tests ${name})
-  if("unit" IN_LIST ARG_LABELS)
-    add_dependencies(smbmgr_tests_unit ${name})
+  if("docker" IN_LIST ARG_LABELS)
+    add_dependencies(smbmgr_tests_docker ${name})
+  else()
+    if("unit" IN_LIST ARG_LABELS OR "integration" IN_LIST ARG_LABELS)
+      add_dependencies(smbmgr_tests_integration ${name})
+    endif()
+    if("unit" IN_LIST ARG_LABELS)
+      add_dependencies(smbmgr_tests_unit ${name})
+    endif()
   endif()
   add_test(NAME ${name} COMMAND ${name})
   set_tests_properties(${name} PROPERTIES LABELS "${ARG_LABELS}")
@@ -73,10 +88,13 @@ smbmgr_add_test(tst_filefilterproxymodel SOURCES unit/tst_filefilterproxymodel.c
 smbmgr_add_test(tst_matchresultsmodel    SOURCES unit/tst_matchresultsmodel.cpp    LABELS "unit")
 smbmgr_add_test(tst_versioncompare       SOURCES unit/tst_versioncompare.cpp       LABELS "unit")
 
-# Connect failures that need no server (bogus DNS, unroutable IP).
+# --- Integration tests: no server, but OS / network dependent ----------------
+
+# Connect failures that need no server (bogus DNS, unroutable IP). Not "unit":
+# the failed DNS lookup alone takes ~11 s on Windows.
 smbmgr_add_test(tst_smbsession_offline
   SOURCES integration/tst_smbsession_offline.cpp
-  LABELS "unit")
+  LABELS "integration")
 
 # --- Suites that need the Samba fixture (label "docker") ---------------------
 #
@@ -103,17 +121,17 @@ if(SMBMGR_DOCKER)
 
   smbmgr_add_test(tst_smbsession
     SOURCES integration/tst_smbsession.cpp common/SmbFixture.cpp
-    LABELS "docker"
+    LABELS "docker;integration"
     FIXTURES samba)
 
   smbmgr_add_test(tst_linkrunner
     SOURCES integration/tst_linkrunner.cpp common/SmbFixture.cpp
-    LABELS "docker"
+    LABELS "docker;integration"
     FIXTURES samba)
 
   smbmgr_add_test(tst_matchsearcher
     SOURCES integration/tst_matchsearcher.cpp common/SmbFixture.cpp
-    LABELS "docker"
+    LABELS "docker;integration"
     FIXTURES samba)
 
   smbmgr_add_test(tst_mainwindow

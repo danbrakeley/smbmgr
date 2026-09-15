@@ -2,7 +2,8 @@
 
 - [Overview](#overview)
 - [Original Problem](#original-problem)
-- [Constraints](#constraints)
+- [Dangers and Alternatives](#dangers-and-alternatives)
+- [Design Constraints](#design-constraints)
 - [Development Notes](#development-notes)
 - [Build](#build)
   - [Windows](#windows)
@@ -12,47 +13,51 @@
 
 ## Overview
 
-SMB Manager allows you to connect to a remote SMB server, view
-files/folders details including inode numbers and hard link counts, and then
-find possible duplicate files and replace one with a link to the other.
+SMB Manager allows you to manage the files on a remote SMB server.
 
-It does this as QUICKLY as possible, and as such it shows potential matches
-WITHOUT doing a comparison of the file contents. It relies on the human
-operator to know what is actually a match. AS SUCH THIS APP IS VERY DANGEROUS.
+Features include:
 
-I do want to add byte-by-byte comparisons at some point, but for my initial
-use case, I didn't need it.
+- view remote inode information
+- manage hard links
+- search for possible duplicate files
+- search for all groups of files that share hard links
 
-Here's what v0.3.1 looks like in action, with the interface for searching and
-viewing results on the left, and detailed directory listings on the right:
-
-![a screenshot of the app running on Windows](./docs/screenshot-v0.3.1.png)
+This project was previously called Hard Link Manager (hardlinkmgr), but has
+been renamed.
 
 ## Original Problem
 
-I've got an SMB share with large files that never change, but there are some
-copies of the same file in different folders with different names, and because
-the files are large, this wastes a lot of disk space. So I wanted to find these
-duplicate files, and use [hard links](https://en.wikipedia.org/wiki/Hard_link)
-to force them both to share the same bytes on disk.
+Create an interactive GUI tool for remotely managing space on my NAS. I want
+this tool to help me identify where space is being used, allow me to do basic
+file management on files/folders, and to view and manage hard links.
 
-There are command line solutions that will do this (e.g.
-[jdupes](https://codeberg.org/jbruchon/jdupes)), but I wanted a different
-experience, including:
+## Dangers and Alternatives
 
-1. do all work remotely via an existing SMB user, with that user's credentials
-   and permissions.
-2. avoid reading every byte of every file I wanted to compare, and instead
-   quickly locate potential matches, then choose the actual matches by hand.
-3. browse files/folders in a GUI, seeing inode and hard link info.
+If you aren't aware of hard links and inodes, make sure you understand what
+they are and the dangers of using hard links before you use this app:
 
-## Constraints
+- [hard link (Wikipedia)](https://en.wikipedia.org/wiki/Hard_link)
+- [inode (Wikipedia)](https://en.wikipedia.org/wiki/Inode)
+
+If your use case involves duplicate files that you want to edit independently,
+then hard links are not for you. I'd check out filesystems with
+[COW](https://en.wikipedia.org/wiki/Copy-on-write) support. For example,
+I know a Synology NAS that uses BTRFS can enable [Fast file clone](https://kb.synology.com/en-my/DSM/help/DSM/AdminCenter/file_service_advanced_introduction?version=7)
+to get COW support on copies made through SMB. Something like that may be a
+better solution for your use case.
+
+Also, if you don't care about working via SMB, and you just want to find
+duplicate files and replace them with hard links, then tools such as
+[jdupes](https://codeberg.org/jbruchon/jdupes)) exist and are probably a
+better match for what you want.
+
+## Design Constraints
 
 - GUI application
-- App starts quickly, stays responsive during work (lightweight, batches slow
-  work in threads)
+- App starts quickly (no leading screen/loading bar)
+- App stays responsive during work (smart use of threads)
 - Low resource usage
-- Cross platform (Windows & Linux required; macOS is nice-to-have)
+- Cross platform (Windows & Linux required; macOS is a future goal)
 - Looks and feels like a native app on each platform.
 
 ## Development Notes
@@ -68,30 +73,35 @@ cross-platform way.
 ```text
 $ make help
 Targets:
-  configure  - regenerate CMake's build files (run after editing CMakeLists.txt)
-  release    - build smbmgr (Release, app only)
-  debug      - build smbmgr (Debug, app only)
-  test-unit  - build + run the serverless unit suite
-  test-all   - build + run every suite (needs Docker)
-  clean      - remove the build/ directory
+  configure        - regenerate CMake's build files (run after editing CMakeLists.txt)
+  release          - build smbmgr (Release, app only)
+  debug            - build smbmgr (Debug, app only)
+  test-unit        - build + run the unit tests (pure logic, fast)
+  test-integration - build + run unit + serverless integration tests (no Docker)
+  test-docker      - build + run the Samba-backed suites (needs Docker)
+  test-all         - build + run every suite (needs Docker)
+  clean            - remove the build/ directory
 ```
 
-| command     | notes                                                                                  |
-| ----------- | -------------------------------------------------------------------------------------- |
-| `configure` | Run this on a fresh sync or after a `clean`, or whenever `CMakeLists.txt` has changed. |
-| `release`   | Generates a release executable. If it fails, try `configure release`.                  |
-| `debug`     | Generates a debug executable. If it fails, try `configure debug`.                      |
-| `test-unit` | Builds and runs unit tests. Does not require Docker.                                   |
-| `test-all`  | Builds and runs unit tests + integration tests. Requires Docker.                       |
-| `clean`     | `rm -rf build`. You'll need to re-run `configure` after.                               |
+| command            | notes                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| `configure`        | Run this on a fresh sync or after a `clean`, or whenever `CMakeLists.txt` has changed. |
+| `release`          | Generates a release executable. If it fails, try `configure release`.                  |
+| `debug`            | Generates a debug executable. If it fails, try `configure debug`.                      |
+| `test-unit`        | Builds and runs unit tests. Fast; does not require Docker.                             |
+| `test-integration` | Builds and runs unit tests + serverless integration tests. Does not require Docker.    |
+| `test-docker`      | Builds and runs the Samba-backed tests only. Requires Docker.                          |
+| `test-all`         | Builds and runs every test. Requires Docker.                                           |
+| `clean`            | `rm -rf build`. You'll need to re-run `configure` after.                               |
 
 ### Windows
 
-- I developed this using [MSBuild 18.8 (Visual Studio 2026)](https://visualstudio.microsoft.com/)
+- Developed using [MSBuild 18.8 (Visual Studio 2026)](https://visualstudio.microsoft.com/)
 - Qt's MSVC binaries can be installed by selecting "Custom Installation" in the [online installer](https://doc.qt.io/qt-6/qt-online-installation.html).
-- To use git and bash scripts, I use [Git for Windows](https://git-scm.com/install/windows)
-- To use the Makefile, I installed `make` via [scoop](https://scoop.sh/).
-- To run the integration tests, you'll need [Docker](https://docs.docker.com/desktop/setup/install/windows-install/) installed and running.
+- Requires [CMake](https://cmake.org/download/) 4.2 or newer (4.2 adds the VS 2026 generator). Can be installed via [scoop](https://scoop.sh/).
+- For git and bash, use [Git for Windows](https://git-scm.com/install/windows)
+- To use the Makefile, install `make`. Can be installed via [scoop](https://scoop.sh/).
+- To run the full test suite, install [Docker](https://docs.docker.com/desktop/setup/install/windows-install/).
 
 Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into the same folder.
 
@@ -113,12 +123,14 @@ Additionally, you'll need **Docker** with Compose v2 to run all the tests.
 
 ## Tests
 
-| command          | notes                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `make test-unit` | Builds and runs the unit tests. These don't need a server.                                              |
-| `make test-all`  | Builds and runs every test, including the integration and widget tests that need a Samba test server. |
+| command                 | notes                                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `make test-unit`        | Builds and runs the unit tests: pure logic, no server or network, fast.                                         |
+| `make test-integration` | Builds and runs the unit tests plus integration tests that need no server but touch the OS or network (slower). |
+| `make test-docker`      | Builds and runs only the integration and widget tests that need a Samba test server.                           |
+| `make test-all`         | Builds and runs every test.                                                                                     |
 
-Running anything beyond the unit tests requires **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
+`make test-docker` and `make test-all` require **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
 
 ## Releasing
 
