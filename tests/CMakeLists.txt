@@ -8,7 +8,7 @@
 # are registered only when docker is on PATH.
 # Every suite uses SMBMGR_TEST_MAIN from common/TestMain.h instead of QTEST_MAIN.
 
-find_package(Qt6 REQUIRED COMPONENTS Test)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Test)
 
 # Umbrella targets so `cmake --build --preset <preset> --target smbmgr_tests`
 # builds every suite in one shot without pulling them into the default ALL

@@ -5,6 +5,10 @@
 # would otherwise go stale across incremental builds, and the version
 # wouldn't pick up new commits/tags or a newly-dirtied working tree.
 #
+# The header is only replaced when its content changes, so a no-op build
+# doesn't recompile AboutDialog.cpp and relink every executable. That is also
+# why the build date has day (not minute) resolution.
+#
 # Expects on the command line (via -D):
 #   DST              - path to the header to write
 #   SRC_DIR          - repo root, to run git commands against
@@ -18,7 +22,7 @@
 # not exactly that tag, then "-dev" is appended if the working tree has
 # uncommitted changes (staged or not).
 
-string(TIMESTAMP SMBMGR_BUILD_DATE "%Y-%m-%d %H:%M UTC" UTC)
+string(TIMESTAMP SMBMGR_BUILD_DATE "%Y-%m-%d" UTC)
 
 set(SMBMGR_VERSION "${FALLBACK_VERSION}")
 
@@ -68,7 +72,9 @@ endif()
 
 get_filename_component(SMBMGR_BUILD_INFO_DIR "${DST}" DIRECTORY)
 file(MAKE_DIRECTORY "${SMBMGR_BUILD_INFO_DIR}")
-file(WRITE "${DST}"
+file(WRITE "${DST}.tmp"
   "#pragma once\n"
   "#define APP_VERSION \"${SMBMGR_VERSION}\"\n"
   "#define APP_BUILD_DATE \"${SMBMGR_BUILD_DATE}\"\n")
+file(COPY_FILE "${DST}.tmp" "${DST}" ONLY_IF_DIFFERENT)
+file(REMOVE "${DST}.tmp")

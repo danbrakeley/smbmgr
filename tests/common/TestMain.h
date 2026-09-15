@@ -5,8 +5,6 @@
 //    a different value first to watch a widget test on screen),
 //  - initializes Winsock on Windows (libsmb2 leaves that to the application,
 //    same as src/main.cpp),
-//  - registers smbmgr_core's Qt resources (Q_INIT_RESOURCE — see the
-//    static-library note in the top-level CMakeLists.txt),
 //  - points QSettings/QStandardPaths at a test location so suites never touch
 //    the developer's real smbmgr configuration.
 
@@ -44,7 +42,6 @@
             qputenv("QT_QPA_PLATFORM", "offscreen");                                  \
         }                                                                             \
         SMBMGR_WIN_INIT                                                               \
-        Q_INIT_RESOURCE(icons);                                                       \
         QApplication app(argc, argv);                                                 \
         QCoreApplication::setOrganizationName(QStringLiteral("brakeley"));            \
         QCoreApplication::setApplicationName(QStringLiteral("smbmgr-test"));          \
