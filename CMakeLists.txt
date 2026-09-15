@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 3.21)
+# 4.2: required for the "windows" preset's Visual Studio 18 (2026) generator
+# Keep in sync with cmakeMinimumRequired in CMakePresets.json.
+cmake_minimum_required(VERSION 4.2)
 
 project(smbmgr
         VERSION 0.4.1
@@ -44,7 +46,7 @@ FetchContent_Declare(
 )
 # libsmb2 (still, as of upstream HEAD) declares cmake_minimum_required(VERSION
 # 3.5), and CMake 4.x warns about anything below 3.10. Treat it as 3.10 for
-# libsmb2 only to silence that. Ignored by CMake < 4.0.
+# libsmb2 only to silence that.
 set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 FetchContent_MakeAvailable(libsmb2)
 unset(CMAKE_POLICY_VERSION_MINIMUM)

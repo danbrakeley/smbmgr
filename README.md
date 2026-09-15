@@ -98,8 +98,9 @@ Targets:
 
 - Developed using [MSBuild 18.8 (Visual Studio 2026)](https://visualstudio.microsoft.com/)
 - Qt's MSVC binaries can be installed by selecting "Custom Installation" in the [online installer](https://doc.qt.io/qt-6/qt-online-installation.html).
+- Requires [CMake](https://cmake.org/download/) 4.2 or newer (4.2 adds the VS 2026 generator). Can be installed via [scoop](https://scoop.sh/).
 - For git and bash, use [Git for Windows](https://git-scm.com/install/windows)
-- To use the Makefile, install `make` (e.g. via [scoop](https://scoop.sh/)).
+- To use the Makefile, install `make`. Can be installed via [scoop](https://scoop.sh/).
 - To run the full test suite, install [Docker](https://docs.docker.com/desktop/setup/install/windows-install/).
 
 Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into the same folder.

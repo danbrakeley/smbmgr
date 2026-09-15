@@ -23,6 +23,7 @@ make test-all           # everything; needs Docker + Compose v2
 - Test executables are `EXCLUDE_FROM_ALL`. Build them before running `ctest`. Each preset has a matching umbrella target: `smbmgr_tests_unit`, `smbmgr_tests_integration`, `smbmgr_tests_docker`, or `smbmgr_tests` (all).
 - On Windows (Visual Studio generator) the target must be subdirectory-qualified: `--target tests/smbmgr_tests`. On Linux (Ninja) use the bare name.
 - Run a single suite: `ctest --preset windows-all -R tst_pathutil` (or `linux-all`), or run the built `tst_*` exe directly, since each suite is its own executable. Output lands in `build/windows/bin/Debug/` on Windows and `build/linux-debug/bin/` on Linux.
+- Minimum CMake is 4.2 (the Visual Studio 18 2026 generator), set in both `CMakeLists.txt` and `CMakePresets.json`. CI reads the project version from the `VERSION` inside `project(...)` only.
 - The Windows preset hardcodes `CMAKE_PREFIX_PATH=C:/Qt/6.11.1/msvc2022_64`. CI overrides it with Qt 6.8.3.
 - libsmb2 comes from FetchContent, pinned to an exact commit and linked statically.
 
