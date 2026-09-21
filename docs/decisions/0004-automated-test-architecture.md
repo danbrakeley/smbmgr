@@ -6,17 +6,16 @@ date: 2026-07-28
 
 ## Context and Problem Statement
 
-Manual testing is slow and cumbersome, and can't be automatically run by
-an agent. We need automated testing.
+Manual testing is slow and cumbersome, and can't be automatically run by an agent. We need automated
+testing.
 
 ## Decision Drivers
 
-- **Should test against a real SMB server** And this should work on any
-  supported dev environment (Windows, Linux; nice-to-have macOS). Tests
-  should be able to verify inode/nlink the apps sees is accurate by querying
-  the test server directly.
-- **Headless and deterministic**: suites run under ctest with no visible
-  windows, no modal dialogs blocking, no reliance on timing luck.
+- **Should test against a real SMB server** And this should work on any supported dev environment
+  (Windows, Linux; nice-to-have macOS). Tests should be able to verify inode/nlink the apps sees is
+  accurate by querying the test server directly.
+- **Headless and deterministic**: suites run under ctest with no visible windows, no modal dialogs
+  blocking, no reliance on timing luck.
 - **Minimal app-code changes**: test seams should not reshape the app.
 
 ## Considered Options
@@ -29,11 +28,10 @@ an agent. We need automated testing.
 
 Chosen option: **Qt Test in-process + Samba in Docker**.
 
-External automation is brittle and slow; a mocked session would skip the
-layer most worth testing and force an interface onto a concrete class for
-no product benefit.
+External automation is brittle and slow; a mocked session would skip the layer most worth testing
+and force an interface onto a concrete class for no product benefit.
 
 ### More Info
 
-The suite already paid for itself twice during construction, catching a
-latent use-after-free and two `pathutil::normalize` edge cases.
+The suite already paid for itself twice during construction, catching a latent use-after-free and
+two `pathutil::normalize` edge cases.

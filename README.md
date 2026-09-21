@@ -22,34 +22,32 @@ Features include:
 - search for possible duplicate files
 - search for all groups of files that share hard links
 
-This project was previously called Hard Link Manager (hardlinkmgr), but has
-been renamed.
+This project was previously called Hard Link Manager (hardlinkmgr), but has been renamed.
 
 ## Original Problem
 
-Create an interactive GUI tool for remotely managing space on my NAS. I want
-this tool to help me identify where space is being used, allow me to do basic
-file management on files/folders, and to view and manage hard links.
+Create an interactive GUI tool for remotely managing space on my NAS. I want this tool to help me
+identify where space is being used, allow me to do basic file management on files/folders, and to
+view and manage hard links.
 
 ## Dangers and Alternatives
 
-If you aren't aware of hard links and inodes, make sure you understand what
-they are and the dangers of using hard links before you use this app:
+If you aren't aware of hard links and inodes, make sure you understand what they are and the dangers
+of using hard links before you use this app:
 
 - [hard link (Wikipedia)](https://en.wikipedia.org/wiki/Hard_link)
 - [inode (Wikipedia)](https://en.wikipedia.org/wiki/Inode)
 
-If your use case involves duplicate files that you want to edit independently,
-then hard links are not for you. I'd check out filesystems with
-[COW](https://en.wikipedia.org/wiki/Copy-on-write) support. For example,
-I know a Synology NAS that uses BTRFS can enable [Fast file clone](https://kb.synology.com/en-my/DSM/help/DSM/AdminCenter/file_service_advanced_introduction?version=7)
-to get COW support on copies made through SMB. Something like that may be a
-better solution for your use case.
+If your use case involves duplicate files that you want to edit independently, then hard links are
+not for you. I'd check out filesystems with [COW](https://en.wikipedia.org/wiki/Copy-on-write)
+support. For example, I know a Synology NAS that uses BTRFS can enable
+[Fast file clone](https://kb.synology.com/en-my/DSM/help/DSM/AdminCenter/file_service_advanced_introduction?version=7)
+to get COW support on copies made through SMB. Something like that may be a better solution for your
+use case.
 
-Also, if you don't care about working via SMB, and you just want to find
-duplicate files and replace them with hard links, then tools such as
-[jdupes](https://codeberg.org/jbruchon/jdupes)) exist and are probably a
-better match for what you want.
+Also, if you don't care about working via SMB, and you just want to find duplicate files and replace
+them with hard links, then tools such as [jdupes](https://codeberg.org/jbruchon/jdupes)) exist and
+are probably a better match for what you want.
 
 ## Design Constraints
 
@@ -67,8 +65,7 @@ better match for what you want.
 
 ## Build
 
-The included [`Makefile`](./Makefile) handles most common operations in a
-cross-platform way.
+The included [`Makefile`](./Makefile) handles most common operations in a cross-platform way.
 
 ```text
 $ make help
@@ -97,13 +94,17 @@ Targets:
 ### Windows
 
 - Developed using [MSBuild 18.8 (Visual Studio 2026)](https://visualstudio.microsoft.com/)
-- Qt's MSVC binaries can be installed by selecting "Custom Installation" in the [online installer](https://doc.qt.io/qt-6/qt-online-installation.html).
-- Requires [CMake](https://cmake.org/download/) 4.2 or newer (4.2 adds the VS 2026 generator). Can be installed via [scoop](https://scoop.sh/).
+- Qt's MSVC binaries can be installed by selecting "Custom Installation" in the
+  [online installer](https://doc.qt.io/qt-6/qt-online-installation.html).
+- Requires [CMake](https://cmake.org/download/) 4.2 or newer (4.2 adds the VS 2026 generator). Can
+  be installed via [scoop](https://scoop.sh/).
 - For git and bash, use [Git for Windows](https://git-scm.com/install/windows)
 - To use the Makefile, install `make`. Can be installed via [scoop](https://scoop.sh/).
-- To run the full test suite, install [Docker](https://docs.docker.com/desktop/setup/install/windows-install/).
+- To run the full test suite, install
+  [Docker](https://docs.docker.com/desktop/setup/install/windows-install/).
 
-Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into the same folder.
+Builds end up in `build\windows\bin\{Release|Debug}\smbmgr.exe`. Required Qt .dlls are copied into
+the same folder.
 
 ### Linux
 
@@ -114,9 +115,14 @@ sudo apt install git curl build-essential cmake ninja-build qt6-base-dev qt6-svg
 ```
 
 - `cmake` + `ninja-build` — the `linux-*` presets use the Ninja generator.
-- `qt6-base-dev` — Qt Widgets/Network/Test development files (Qt 6.10 on 26.04); the Test module's CMake config ships in this package too, so no separate package is needed to build the `tests/` suites.
-- `qt6-svg-dev` — Qt6::Svg development files (headers + CMake config), needed for the toolbar/action icons. `qt6-base-dev` only pulls in the runtime library (`libqt6svg6`), not this, so it must be listed explicitly.
-- `qt6-wayland` — Qt's Wayland platform plugin, so the app runs natively on Ubuntu's default Wayland session.
+- `qt6-base-dev` — Qt Widgets/Network/Test development files (Qt 6.10 on 26.04); the Test module's
+  CMake config ships in this package too, so no separate package is needed to build the `tests/`
+  suites.
+- `qt6-svg-dev` — Qt6::Svg development files (headers + CMake config), needed for the toolbar/action
+  icons. `qt6-base-dev` only pulls in the runtime library (`libqt6svg6`), not this, so it must be
+  listed explicitly.
+- `qt6-wayland` — Qt's Wayland platform plugin, so the app runs natively on Ubuntu's default Wayland
+  session.
 - `libgl1-mesa-dev` — OpenGL headers, required when linking against Qt6::Gui.
 
 Additionally, you'll need **Docker** with Compose v2 to run all the tests.
@@ -127,21 +133,30 @@ Additionally, you'll need **Docker** with Compose v2 to run all the tests.
 | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `make test-unit`        | Builds and runs the unit tests: pure logic, no server or network, fast.                                         |
 | `make test-integration` | Builds and runs the unit tests plus integration tests that need no server but touch the OS or network (slower). |
-| `make test-docker`      | Builds and runs only the integration and widget tests that need a Samba test server.                           |
+| `make test-docker`      | Builds and runs only the integration and widget tests that need a Samba test server.                            |
 | `make test-all`         | Builds and runs every test.                                                                                     |
 
-`make test-docker` and `make test-all` require **Docker** with Compose v2. The test run starts a Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker isn't on your PATH, those tests are skipped and only the unit tests run. See [ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
+`make test-docker` and `make test-all` require **Docker** with Compose v2. The test run starts a
+Samba container, runs the SMB-backed tests against it, and then tears the container down. If Docker
+isn't on your PATH, those tests are skipped and only the unit tests run. See
+[ADR 4](./docs/decisions/0004-automated-test-architecture.md) for background.
 
 ## Releasing
 
-`.github/workflows/release.yml` builds Windows and Linux artifacts and attaches them to a Release. This job requires the `VERSION` in `CMakeLists.txt` to match the pushed tag.
+`.github/workflows/release.yml` builds Windows and Linux artifacts and attaches them to a Release.
+This job requires the `VERSION` in `CMakeLists.txt` to match the pushed tag.
 
 So the specific steps are:
 
-1. Bump `VERSION` in the top-level `CMakeLists.txt`'s `project()` call. `VERSION` is used in the Linux `.deb`'s filename via CPack (`CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT"`). Note that the Windows zip's name is unversioned.
+1. Bump `VERSION` in the top-level `CMakeLists.txt`'s `project()` call. `VERSION` is used in the
+   Linux `.deb`'s filename via CPack (`CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT"`). Note that the Windows
+   zip's name is unversioned.
 
-2. Create a Release with a tag `vMAJOR.MINOR.PATCH`, matching the `CMakeLists.txt` value exactly. The workflow verifies this in the `check-version` job.
+2. Create a Release with a tag `vMAJOR.MINOR.PATCH`, matching the `CMakeLists.txt` value exactly.
+   The workflow verifies this in the `check-version` job.
 
-3. The tag creation triggers the release workflow, and when the workflow is complete, it attaches the build artifacts to the GitHub Release automatically.
+3. The tag creation triggers the release workflow, and when the workflow is complete, it attaches
+   the build artifacts to the GitHub Release automatically.
 
-Note that you can manually run this workflow on any commit without a `v*` tag, and it will safely skip trying to upload the artifacts to a release.
+Note that you can manually run this workflow on any commit without a `v*` tag, and it will safely
+skip trying to upload the artifacts to a release.

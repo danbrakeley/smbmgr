@@ -6,18 +6,18 @@ date: 2026-07-28
 
 ## Context and Problem Statement
 
-The match finder (ADR-2) locked in a workflow that assumed exactly two file
-browser views. Currently the GUI starts with 1, and allows adding any number
-of views. Do we still need more than 2 views? Or less than 2 views?
+The match finder (ADR-2) locked in a workflow that assumed exactly two file browser views. Currently
+the GUI starts with 1, and allows adding any number of views. Do we still need more than 2 views? Or
+less than 2 views?
 
 ## Decision Drivers
 
-- **Match the actual workflow.** The Match Finder is now how matches get found;
-  it only ever addresses two views (primary/secondary). Arbitrary extra views
-  serve the old manual-comparison workflow the Match Finder was built to replace.
-- **Less UI, less code to keep correct.** Add/remove-view UI means splitter
-  child-count bookkeeping, per-view close-button visibility toggling, and
-  `MainWindow::m_views` needing to stay in sync with a mutable splitter.
+- **Match the actual workflow.** The Match Finder is now how matches get found; it only ever
+  addresses two views (primary/secondary). Arbitrary extra views serve the old manual-comparison
+  workflow the Match Finder was built to replace.
+- **Less UI, less code to keep correct.** Add/remove-view UI means splitter child-count bookkeeping,
+  per-view close-button visibility toggling, and `MainWindow::m_views` needing to stay in sync with
+  a mutable splitter.
 
 ## Considered Options
 

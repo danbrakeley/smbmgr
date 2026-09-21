@@ -31,7 +31,7 @@ else
   TEST_ALL_PRESET         := linux-all
 endif
 
-.PHONY: help configure release debug test-unit test-integration test-docker test-all clean
+.PHONY: help configure release debug test-unit test-integration test-docker test-all fmt-docs check-docs clean
 
 help:
 	@echo "Targets:"
@@ -42,6 +42,8 @@ help:
 	@echo "  test-integration - build + run unit + serverless integration tests (no Docker)"
 	@echo "  test-docker      - build + run the Samba-backed suites (needs Docker)"
 	@echo "  test-all         - build + run every suite (needs Docker)"
+	@echo "  fmt-docs         - re-wrap the markdown docs to the width in deno.jsonc (needs deno)"
+	@echo "  check-docs       - fail if any markdown doc is not wrapped to that width"
 	@echo "  clean            - remove the build/ directory"
 
 configure:
@@ -68,6 +70,13 @@ test-docker:
 test-all:
 	cmake --build --preset $(DEBUG_PRESET) --target $(TEST_ALL_TARGET) --parallel
 	ctest --preset $(TEST_ALL_PRESET)
+
+# Which files, and the line width, live in deno.jsonc.
+fmt-docs:
+	deno fmt
+
+check-docs:
+	deno fmt --check
 
 clean:
 	rm -rf build

@@ -1,0 +1,13 @@
+// Only used for `deno fmt`, which hard-wraps the markdown docs (`make fmt-docs`,
+// `make check-docs`, and the Claude Code hook scripts/fmt-md-hook.sh). To change
+// the agreed width, edit lineWidth and run `make fmt-docs`.
+{
+  "fmt": {
+    "lineWidth": 100,
+    "proseWrap": "always",
+    // "**" does not descend into dot-directories, so .claude/ is listed itself.
+    "include": ["**/*.md", ".claude/**/*.md"],
+    // The Qt skills are vendored; leave them diffable against upstream.
+    "exclude": ["build/", "local/", "qt/", ".claude/skills/qt-*/"]
+  }
+}
