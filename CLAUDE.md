@@ -6,6 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SMB Manager (`smbmgr`): a C++20 / Qt 6 Widgets desktop app (Windows + Linux) that connects to an SMB share via libsmb2, browses files with inode and hard-link counts, finds candidate duplicate files by metadata only (no content comparison), and replaces chosen files with hard links.
 
+## Workflow
+
+- `docs/master-plan.md` is the only plan document: what to work on next, in order. Decisions that outlive a unit of work are ADRs in `docs/decisions/`.
+- The loop is the `/next` skill (`.claude/skills/next/SKILL.md`): pick the target, branch `next/<slug>`, design, implement, gate, review, doc pass, handoff. Run it rather than a prose "do the next chunk" prompt, so no step is skipped.
+- The state is the branch plus the plan at `local/plans/<slug>.md`, not the conversation. `local/` is gitignored. `/clear` once the plan is written (mandatory) and between units, then run `/next` again; it resumes from the plan's Progress section.
+- `/next` never pushes, opens a PR or merges. It hands back a committed branch.
+
 ## Build & test
 
 The `Makefile` wraps the CMake presets (`CMakePresets.json`) and picks Windows or Linux names automatically:
@@ -59,3 +66,12 @@ Each suite carries the label of its folder, plus `docker` if it needs the Samba 
 - `docs/decisions/` holds MADR-format ADRs.
 - `.editorconfig`: UTF-8, LF, final newline, trim trailing whitespace.
 - Third-party icons are credited in `THIRD_PARTY_NOTICES.md` and the per-folder READMEs under `resources/icons/`.
+
+## Before handing work off
+
+A unit of work is not finished when the code is finished. Take a pass over the documentation the task actually used (`CLAUDE.md`, `docs/`, any `.claude/` skill) and land the updates on the same branch as the work:
+
+- **Record what the task taught.** A gotcha that cost time, a tool that behaved differently than documented: write it where the next session will look for it. The target's entry in `docs/master-plan.md` moves on the branch that moves the target.
+- **Correct what the task disproved.** Fix the claim outright rather than leaving both versions standing.
+- **Delete what has turned into history.** Git and the PRs hold the history. A passage earns its place only if it changes what a future session *does*.
+- **Put it in the smallest home that works.** `CLAUDE.md` is loaded into every session, so a line costs most here. Detail only one kind of task needs belongs in that task's doc or skill.

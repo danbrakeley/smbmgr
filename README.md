@@ -62,7 +62,7 @@ better match for what you want.
 
 ## Development Notes
 
-- [roadmap.md](./docs/roadmap.md) - Where this app is heading
+- [master-plan.md](./docs/master-plan.md) - Where this app is heading, and what is next
 - [ADRs](./docs/decisions/) - Architectural Decision Records
 
 ## Build

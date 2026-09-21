@@ -3,6 +3,7 @@
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   },
   "effortLevel": "high",
+  "autoCompactWindow": 0.4,
   "spinnerVerbs": {
     "mode": "replace",
     "verbs": [

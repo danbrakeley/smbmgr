@@ -1,6 +1,10 @@
 /build/
 CMakeUserPresets.json
 
+# Per-machine working files that must survive a /clear but never reach a
+# commit: the /next skill writes its plans to local/plans/.
+/local/
+
 # release.yml's windows job installs Qt via jurplel/install-qt-action with
 # dir: ${{ github.workspace }}/qt -- i.e. straight into the checkout. Left
 # untracked, that made `git status --porcelain` (cmake/GenerateBuildInfo.cmake's
