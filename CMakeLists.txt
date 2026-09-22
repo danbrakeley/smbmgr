@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 4.2)
 
 project(smbmgr
-        VERSION 0.4.2
+        VERSION 0.4.3
         DESCRIPTION "File manager for remote SMB shares"
         LANGUAGES C CXX)
 

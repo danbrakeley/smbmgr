@@ -43,7 +43,8 @@ make test-all           # everything; needs Docker + Compose v2
   `--target tests/smbmgr_tests`. On Linux (Ninja) use the bare name.
 - Run a single suite: `ctest --preset windows-all -R tst_pathutil` (or `linux-all`), or run the
   built `tst_*` exe directly, since each suite is its own executable. Output lands in
-  `build/windows/bin/Debug/` on Windows and `build/linux-debug/bin/` on Linux.
+  `build/windows/bin/Debug/` on Windows and `build/linux-debug/bin/` on Linux. Run from Git Bash on
+  Windows, a `tst_*` exe prints nothing to the pipe; pass `-o <file>,txt` and read the file.
 - Minimum CMake is 4.2 (the Visual Studio 18 2026 generator), set in both `CMakeLists.txt` and
   `CMakePresets.json`. CI reads the project version from the `VERSION` inside `project(...)` only.
 - The Windows preset hardcodes `CMAKE_PREFIX_PATH=C:/Qt/6.11.1/msvc2022_64`. CI overrides it with Qt
@@ -71,6 +72,9 @@ Windows every executable must also call `WSAStartup` (libsmb2 doesn't).
   victim path, unlink tmp, and on link failure it renames back. Header-only pure logic (`PathUtil`,
   `MatchPairing`, `MatchConflicts`, `LogFormat`, `VersionCompare`) is where most unit tests aim.
   Paths are share-absolute (`/` = share root) and normalized with `pathutil::normalize`.
+  `sharecache::Store` (`ShareCacheStore.h`) is the share cache's data layer: listings, link counts,
+  the invalidation rules and stat ordering, with an injected clock. Nothing uses it until the facade
+  lands.
 - **`core/Logger`**: a singleton JSONL audit log (`AppLocalDataLocation/log.jsonl`). Connects,
   disconnects, errors, and every server-side mutation are logged from inside `SmbSession`.
 - **`ui/`**: `MainWindow` holds the URL bar (`smb://[domain;]user@host[:port]/share`),
