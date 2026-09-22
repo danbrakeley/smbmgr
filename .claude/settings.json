@@ -3,6 +3,21 @@
     "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   },
   "effortLevel": "high",
+  "autoCompactWindow": 0.4,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/fmt-md-hook.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
   "spinnerVerbs": {
     "mode": "replace",
     "verbs": [
