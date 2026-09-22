@@ -72,6 +72,8 @@ qt_add_library(smbmgr_core STATIC
   src/core/MatchSearcher.cpp
   src/core/MatchSearcher.h
   src/core/PathUtil.h
+  src/core/ShareCacheStore.cpp
+  src/core/ShareCacheStore.h
   src/core/VersionCompare.h
   src/models/FileFilterProxyModel.cpp
   src/models/FileFilterProxyModel.h
