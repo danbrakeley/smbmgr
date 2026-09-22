@@ -87,6 +87,7 @@ smbmgr_add_test(tst_filelistmodel        SOURCES unit/tst_filelistmodel.cpp     
 smbmgr_add_test(tst_filefilterproxymodel SOURCES unit/tst_filefilterproxymodel.cpp LABELS "unit")
 smbmgr_add_test(tst_matchresultsmodel    SOURCES unit/tst_matchresultsmodel.cpp    LABELS "unit")
 smbmgr_add_test(tst_versioncompare       SOURCES unit/tst_versioncompare.cpp       LABELS "unit")
+smbmgr_add_test(tst_sharecachestore      SOURCES unit/tst_sharecachestore.cpp      LABELS "unit")
 
 # --- Integration tests: no server, but OS / network dependent ----------------
 

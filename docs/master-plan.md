@@ -26,14 +26,13 @@ Where the code does not meet one yet, closing that gap is plan work, not an excu
 
 ## Next up
 
-1. Share cache store
-2. Share cache facade, and the file views read through it
-3. Match search through the cache, and verified write-through linking
-4. Refresh button and data-age display
+1. Share cache facade, and the file views read through it
+2. Match search through the cache, and verified write-through linking
+3. Refresh button and data-age display
 
 ## Entries
 
-### Share cache: context shared by the four entries below
+### Share cache: context shared by the three entries below
 
 Not a target. It shrinks as the entries land, and goes when the last one does.
 
@@ -57,16 +56,14 @@ later feature reads through it.
 
 1. `SmbSession` stays the transport. It gains only what a unit below names.
 2. A pure store: directory snapshots, per-entry link counts, timestamps, an inode → paths index, and
-   the invalidation rules. No event loop, no network, an injected clock. Same pattern as `PathUtil`
-   and `MatchPairing`, because the invalidation rules are what most needs unit tests.
+   the invalidation rules. No event loop, no network, an injected clock. **Landed** as
+   `sharecache::Store` (`src/core/ShareCacheStore.h`, suite `tst_sharecachestore`); the header
+   documents the contract.
 3. A `QObject` facade over both: fetching, request coalescing, one global stat scheduler,
    notification batching. `FileBrowserView`, `MatchSearcher` and `LinkRunner` end up taking this,
-   not `SmbSession*`.
+   not `SmbSession*`. Name: `ShareCache` in `src/core/ShareCache.{h,cpp}`.
 
-Suggested names, for the first unit's design to confirm: `sharecache::Store` in
-`src/core/ShareCacheStore.h`, and `ShareCache` in `src/core/ShareCache.{h,cpp}`.
-
-**Decided across all four:**
+**Decided across all three:**
 
 - Reads are synchronous and changes arrive as signals (the `QFileSystemModel` shape), not
   request-and-reply. `lookup(dir)` returns the snapshot, its state (Missing, Loading, Fresh, Stale,
@@ -83,59 +80,31 @@ Suggested names, for the first unit's design to confirm: `sharecache::Store` in
   (`docs/decisions/0005-mutations-never-trust-the-share-cache.md`).
 - OS file icons stay out of the cache (see "Deferred").
 
-### Share cache store
-
-**Scope.** The pure data layer and its unit tests. Nothing uses it yet, so the app does not change.
-No `QObject`, no `SmbSession`, no timers.
-
-**It must provide:**
-
-- Directory snapshots keyed by normalized share-absolute path (`pathutil::normalize`): the
-  `FileEntry` list (`src/smb/SmbTypes.h:7-21`), a state, a fetch time, and the error message when
-  Failed.
-- A per-entry link count with its own fetch time. Listings and stats arrive separately and age
-  separately.
-- An inode → paths index over everything cached, kept correct through every insert, replace and
-  removal.
-- Applying a new listing over an old one as a **diff**: rows inserted, removed and changed, in a
-  form `FileListModel` can later turn into `beginInsertRows`/`beginRemoveRows`/`dataChanged`. When a
-  name keeps its inode across the re-list, its old link count is carried over and marked stale
-  rather than dropped to Unknown, so a refresh does not blank the Links column.
-- The invalidation rules, as pure functions of "what happened":
-  - rename: both parent directories go Stale;
-  - hard link created: both parents go Stale, and the link count of **every** cached path sharing
-    the target's inode goes stale, wherever it lives;
-  - unlink: the parent goes Stale, and every cached path sharing that inode has its link count go
-    stale;
-  - a stat whose inode disagrees with the listing's inode means the file was replaced: the directory
-    goes Stale. (`fileStatted` already carries the inode and nobody reads it,
-    `src/ui/FileBrowserView.cpp:318-320`.)
-- "What needs fetching": given the subscribed directories and a priority hint (names in a
-  directory), the next N paths to stat. The facade owns in-flight accounting; the store owns the
-  ordering.
-- An entry count, and `clear()`.
-
-**Traps.**
-
-- The clock is injected (a function or a small interface returning a monotonic time point). Tests
-  must never sleep.
-- Paths are case-sensitive as the server returns them. Do not fold case; the sort proxy's case
-  option is display only.
-- Stale is not Missing. Stale data is still served; only the facade decides when to re-fetch it.
-- `FileEntry::modified` is a `QDateTime`. Measure the per-entry footprint with a 100k-entry test
-  before picking containers: unit 3 puts whole-share crawls in here.
-- Keep the diff stable under reordering. The server's enumeration order is not guaranteed to repeat,
-  and a pure reorder must not read as N removals plus N insertions.
-
-**Tests.** A new `tests/unit/tst_sharecachestore.cpp`, label `unit`, registered with
-`smbmgr_add_test(...)`. Cover each invalidation rule, the inode index through replace and removal,
-the diff (including a pure reorder and a same-name-new-inode replacement), link-count carry-over,
-and the stat ordering with a priority hint.
-
 ### Share cache facade, and the file views read through it
 
 **Scope.** The `QObject` facade, and `FileBrowserView`/`FileListModel` moved onto it.
 `MatchSearcher` and `LinkRunner` still talk to `SmbSession` directly after this unit.
+
+**What the store hands the facade** (decided in the store unit; `src/core/ShareCacheStore.h` is the
+reference):
+
+- Entries are stored sorted by name, case-sensitive. `FileListModel`'s source order becomes name
+  order; the sort proxy orders the view anyway, so nothing user-visible changes.
+- `applyListing` returns a `Diff`: `removed` (old-list rows, descending), then `inserted` and
+  `changed` (new-list rows, ascending). Apply them in that order and the model matches the store.
+- `markLoading` keeps the old entries, so a refresh keeps serving. A directory invalidated while
+  Loading lands **Stale**, not Fresh: "re-fetch subscribed Stale directories" has to be the facade's
+  normal loop, not a special case.
+- Each `note*()` returns an `Invalidation` (stale directories, stale link-count rows) to signal
+  from. `markAllStale()` is the `linkRunFinished` hook named under "Traps".
+- `nextStats(subscriptions, exclude, max)`: the facade passes its in-flight set as `exclude`; each
+  `Subscription` carries the visible names as its priority hint. A cached stat failure is never
+  retried by the store.
+- Pointers from `find`/`findEntry` die on the next non-const call. Hold an `EntryRef` (dir, row)
+  across calls and re-resolve after a listing lands.
+- `applyListing` on 100k entries is one synchronous pass of about 300 ms in a Debug build
+  (`footprint100k` prints the numbers). Decide here whether that needs chunking; the store does not
+  chunk.
 
 **The facade:**
 
@@ -176,7 +145,7 @@ and the stat ordering with a priority hint.
   `SmbSession`, and the only hook is `linkRunFinished` → `view->refresh()`
   (`src/ui/MainWindow.cpp:237-242`). Once directories persist beyond the one on screen, that misses
   every other cached name of the two inodes. Until unit 3 routes mutations through the facade, this
-  unit marks the **whole cache** Stale on `linkRunFinished`. Crude and correct; unit 3 replaces it.
+  unit calls `Store::markAllStale()` on `linkRunFinished`. Crude and correct; unit 3 replaces it.
 - `refresh()` has to mean `ShareCache::refresh(dir)`, not `ensure`, or the post-link refresh becomes
   a no-op (`src/ui/FileBrowserView.cpp:228-233`).
 - `SMBMGR_STAT_DELAY_MS` (`src/smb/SmbSession.h:158`) is the way to see the scheduler and the

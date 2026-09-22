@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 4.2)
 
 project(smbmgr
-        VERSION 0.4.2
+        VERSION 0.4.3
         DESCRIPTION "File manager for remote SMB shares"
         LANGUAGES C CXX)
 
@@ -72,6 +72,8 @@ qt_add_library(smbmgr_core STATIC
   src/core/MatchSearcher.cpp
   src/core/MatchSearcher.h
   src/core/PathUtil.h
+  src/core/ShareCacheStore.cpp
+  src/core/ShareCacheStore.h
   src/core/VersionCompare.h
   src/models/FileFilterProxyModel.cpp
   src/models/FileFilterProxyModel.h
