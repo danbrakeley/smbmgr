@@ -23,9 +23,15 @@
 // Entries are stored sorted by name (QString::compare, case-sensitive, never
 // folded) and found by binary search, so a listing that merely comes back in
 // a different order produces an empty diff.
+//
+// Not thread-safe: the store lives on the GUI thread with its facade, like
+// everything else in the app. Pointers returned by the reads are valid only
+// until the next non-const call; hold an EntryRef (dir, row) across calls
+// instead, and re-resolve it after a listing lands.
 namespace sharecache {
 
 using TimePoint = std::chrono::steady_clock::time_point;
+// Must not call back into the store: it runs while a record is mid-update.
 using Clock = std::function<TimePoint()>;
 
 enum class State {
@@ -38,17 +44,17 @@ enum class State {
 
 struct Entry
 {
-    FileEntry file;             // file.nlink is the served link count
-    TimePoint nlinkFetchedAt{}; // meaningful when file.nlink != kNlinkUnknown
-    bool nlinkStale = false;    // served, but a re-stat is wanted
+    FileEntry file;                // file.nlink is the served link count
+    TimePoint nlinkFetchedAt = {}; // meaningful when file.nlink != kNlinkUnknown
+    bool nlinkStale = false;       // served, but a re-stat is wanted
 };
 
 struct Directory
 {
     QList<Entry> entries; // always sorted by Entry::file.name
     State state = State::Missing;
-    TimePoint fetchedAt{}; // last successful listing
-    QString error;         // set when Failed
+    TimePoint fetchedAt = {}; // last successful listing
+    QString error;            // meaningful only when Failed (kept through a retry)
 };
 
 struct RowRange
@@ -107,6 +113,10 @@ class Store
 {
 public:
     explicit Store(Clock clock = {}); // empty: steady_clock::now
+    Store(const Store &) = delete;    // one cache; a copy would be a bug
+    Store &operator=(const Store &) = delete;
+    Store(Store &&) = default;
+    Store &operator=(Store &&) = default;
 
     // --- Reads (paths are normalized here) --------------------------------
 
@@ -126,7 +136,9 @@ public:
     // (the reply may predate the mutation). Link counts carry over by inode
     // and are flagged stale; a name whose inode changed starts over Unknown.
     Diff applyListing(const QString &dir, const QList<FileEntry> &entries);
-    void applyListFailure(const QString &dir, const QString &message); // entries kept
+    // Creates the record if needed, like markLoading; entries are kept.
+    void applyListFailure(const QString &dir, const QString &message);
+    // `nlink` is a real count; failures go through applyStatFailure.
     StatResult applyStat(const QString &path, int nlink, quint64 inode);
     StatResult applyStatFailure(const QString &path); // stores kNlinkUnavailable
 

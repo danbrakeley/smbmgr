@@ -8,6 +8,28 @@
 
 using namespace sharecache;
 
+// Legible QCOMPARE failures for the store's non-Qt types.
+namespace QTest {
+template <>
+inline char *toString(const TimePoint &t)
+{
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t.time_since_epoch());
+    return qstrdup(qPrintable(QStringLiteral("t=%1ms").arg(ms.count())));
+}
+template <>
+inline char *toString(const State &s)
+{
+    static const char *const names[] = {"Missing", "Loading", "Fresh", "Stale", "Failed"};
+    return qstrdup(names[int(s)]);
+}
+template <>
+inline char *toString(const StatOutcome &o)
+{
+    static const char *const names[] = {"Applied", "InodeMismatch", "NotCached"};
+    return qstrdup(names[int(o)]);
+}
+} // namespace QTest
+
 namespace {
 
 // A tick counter stands in for the monotonic clock.
@@ -596,6 +618,10 @@ void TestShareCacheStore::nextStatsAfterInvalidation()
     QCOMPARE(store.nextStats(subs, {}, 10), QStringList({"/a/x", "/b/z"}));
     store.applyStat("/a/x", 3, 1);
     store.applyStat("/b/z", 3, 1);
+    QVERIFY(store.nextStats(subs, {}, 10).isEmpty());
+
+    // A stale listing alone changes no row's stat status.
+    store.noteRenamed("/a/x", "/a/x2");
     QVERIFY(store.nextStats(subs, {}, 10).isEmpty());
 
     // A re-list with a carried count makes the rows stale again; an

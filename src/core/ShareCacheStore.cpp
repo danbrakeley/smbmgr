@@ -137,7 +137,7 @@ void Store::markStaleRecord(Record &rec, const QString &key, Invalidation *out)
     } else {
         rec.dir.state = State::Stale;
     }
-    rec.statCursor = 0;
+    // The cursor is left alone: a stale listing changes no row's stat status.
     if (out) {
         appendUnique(out->staleDirectories, key);
     }
@@ -157,7 +157,7 @@ void Store::staleLinkCountsOf(quint64 inode, Invalidation *out)
     if (inode == 0) {
         return;
     }
-    const QList<QString> paths = m_inodes.values(inode);
+    const QStringList paths = m_inodes.values(inode);
     for (const QString &path : paths) {
         QString key;
         int row = -1;
@@ -166,7 +166,8 @@ void Store::staleLinkCountsOf(quint64 inode, Invalidation *out)
             continue; // Unknown is already a stat candidate; not "stale"
         }
         e->nlinkStale = true;
-        findRecord(key)->statCursor = 0;
+        Record *rec = findRecord(key);
+        rec->statCursor = (std::min)(rec->statCursor, row);
         if (out) {
             out->staleLinkCounts.append({key, row});
         }
@@ -265,8 +266,10 @@ Diff Store::applyListing(const QString &dir, const QList<FileEntry> &entries)
             const Entry &o = old[i];
             Entry &n = incoming[j];
             if (o.file.inode == n.file.inode) {
-                // Same file: the link count carries over, but a re-stat is
-                // wanted since the re-list may have been prompted by a change.
+                // Same file (or no inode on either side, in which case the
+                // stale flag below gets it re-stat'ed anyway): the link count
+                // carries over, but a re-stat is wanted since the re-list may
+                // have been prompted by a change.
                 n.file.nlink = o.file.nlink;
                 n.nlinkFetchedAt = o.nlinkFetchedAt;
                 n.nlinkStale = o.file.nlink != FileEntry::kNlinkUnknown;
@@ -308,6 +311,7 @@ void Store::applyListFailure(const QString &dir, const QString &message)
 
 StatResult Store::applyStat(const QString &path, int nlink, quint64 inode)
 {
+    Q_ASSERT(nlink != FileEntry::kNlinkUnknown && nlink != FileEntry::kNlinkUnavailable);
     StatResult result;
     Entry *e = findEntryMutable(path, &result.ref.dir, &result.ref.row);
     if (!e) {
@@ -321,7 +325,9 @@ StatResult Store::applyStat(const QString &path, int nlink, quint64 inode)
         // not re-requested ahead of Unknown ones, flag it, and let the
         // parent's re-list bring the new inode in.
         e->nlinkStale = true;
-        markStale(result.ref.dir, nullptr);
+        Record *rec = findRecord(result.ref.dir);
+        rec->statCursor = (std::min)(rec->statCursor, result.ref.row);
+        markStaleRecord(*rec, result.ref.dir, nullptr);
         result.outcome = StatOutcome::InodeMismatch;
     } else {
         e->nlinkStale = false;
@@ -387,6 +393,7 @@ void Store::markAllStale()
 {
     for (auto it = m_dirs.begin(); it != m_dirs.end(); ++it) {
         markStaleRecord(it.value(), it.key(), nullptr);
+        it->statCursor = 0;
         for (Entry &e : it->dir.entries) {
             if (!e.file.isDir && e.file.nlink != FileEntry::kNlinkUnknown) {
                 e.nlinkStale = true;
@@ -449,6 +456,9 @@ QStringList Store::nextStats(const QList<Subscription> &subscriptions,
         const QList<Entry> &entries = rec->dir.entries;
 
         for (const QString &name : sub.priorityNames) {
+            if (unknown.size() >= max - out.size()) {
+                break; // enough Unknown rows to fill the batch; stale ones rank below
+            }
             const int row = rowOf(entries, name);
             if (row >= 0 && needsStat(entries[row])) {
                 consider(key, entries[row]);
